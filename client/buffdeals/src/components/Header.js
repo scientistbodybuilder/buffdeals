@@ -1,4 +1,5 @@
 import React from 'react'
+import '../styles/header.css'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faGithub,
