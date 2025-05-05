@@ -1,10 +1,14 @@
 from selenium import webdriver
 import re
 # import undetected_chromedriver as uc
-from webdriver_manager.firefox import GeckoDriverManager
-from selenium.webdriver.firefox.service import Service
+# from webdriver_manager.firefox import GeckoDriverManager
+# from selenium.webdriver.firefox.service import Service
+# from selenium.webdriver.firefox.options import Options
+
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options
 import time as tm, os, subprocess
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -12,16 +16,16 @@ from selenium.common.exceptions import StaleElementReferenceException
 
 if __name__ == "__main__":
     # BEGIN SCRAPPING
-    service = Service(GeckoDriverManager().install())
+    service = Service(ChromeDriverManager().install())
     options = Options()
     #options.add_argument(f'--proxy-server=={}')
     # options.add_argument(r'--user-data-dir=C:\Users\ser\AppData\Local\Google\Chrome\User Data\Default')
-
-    driver = webdriver.Firefox(service=service, options=options)
+    options.add_argument("--window-size=2560,1600")
+    driver = webdriver.Chrome(service=service, options=options)
     urls = ['https://ca.myprotein.com/','https://revolution-nutrition.com/','https://www.costco.ca/']
     finds = []
     timeout = 30
-    print('MY PROTEIN')
+    print('MY PROTEIN\n')
     driver.get(urls[0])
     search_bar = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[id='search-input']")))
     search_bar.clear()
@@ -38,31 +42,66 @@ if __name__ == "__main__":
         container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH,"//product-list[@id='product-list-wrapper']/product-card-wrapper")))
         try:
             product = container[i].find_element(By.XPATH,'.//a')
-            html = product.get_attribute("outerHTML")
         except StaleElementReferenceException as e:
             print("Stale Element Exception Occured: Retrying")
             tm.sleep(2)
             product = container[i].find_element(By.XPATH,'.//a')
-            html = product.get_attribute("outerHTML")
 
-        href = html.split()
-        print(f'href: {href}')
-        product_url_pattern = r'/p/.*/.*/.*/'
-        product_url = re.findall(product_url_pattern,href[1])[0]
+        product_url = product.get_attribute("href")
         print(f'product_url: {product_url}')
 
-        product_name = html.split('data')[3].strip('-title="').strip()[:-1]
-        print(f'product name: {product_name}')
+        product_title = product.get_attribute('data-title')
+        print(f'product name: {product_title}')
 
-    print('REVOLUTION NUTRITION')
+        if re.search(r'.*whey.*(protein)*.*',product_title.lower()):
+            driver.get(product_url)
+            find = {'name':product_title}
+            sizes = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='elements-variations-buttons-wrapper']/li")))
+            print(f'There are {len(sizes)} sizes')
+            # add logic to check whether there is more than one size. If there is more than one flavour, always click chocolate click, so that all sizes are available
+            product_sizes = []
+
+            for i in range(len(sizes)):
+                # click that size
+                try:
+                    size_btn = WebDriverWait(driver,timeout).until(EC.element_to_be_clickable((By.XPATH, f"(//ul[@class='elements-variations-buttons-wrapper']/li)[{i+1}]")))
+                    driver.execute_script("arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });", size_btn )
+                    print('attemp click')
+                    size_btn.click()
+                    product_size = size_btn.text
+                except StaleElementReferenceException as e:
+                    print('Stale Element Exception Occured: Retrying')
+                    tm.sleep(2)
+                    size_btn = WebDriverWait(driver,timeout).until(EC.element_to_be_clickable((By.XPATH, f"(//ul[@class='elements-variations-buttons-wrapper']/li)[{i+1}]")))
+                    driver.execute_script("arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });", size_btn)
+                    size_btn.click()
+                    product_size = size_btn.text
+
+                try:
+                    product_price = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.XPATH, "//div[@id='price-wrapper']/div/div/span"))).text
+                except StaleElementReferenceException as e:
+                    print('Stale Element Exception Occured: Retrying')
+                    tm.sleep(2)
+                    product_price = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.XPATH, "//div[@id='price-wrapper']/div/div/span"))).text
+
+                print(f'size: {product_size}')
+                print(f'price: {product_price}')
+                product_sizes.append({
+                    'size':product_size,
+                    'price':product_price
+                })
+            find['sizes'] = product_sizes
+            find['href'] = product_url
+            finds.append(find)
+            driver.back()
+
+    print('\nREVOLUTION NUTRITION\n')
     driver.get(urls[1])
-    tm.sleep(1)
     search_bar  = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[id='search-input-desktop']")))
     search_bar.clear()
     search_bar.send_keys('whey protein')
     search_btn = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.CSS_SELECTOR, "button[aria-label='search button']"))).click()
 
-    tm.sleep(1)
     print('beginning iteration')
 
     container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, ".//ul[@id='product-blocks']/li")))
@@ -83,21 +122,30 @@ if __name__ == "__main__":
 
         if re.search(r'.*whey.*(protein)*.*',product_title.lower()):
             driver.get(product_href)
-            tm.sleep(1)
             find = {'name':product_title}
             # get the size and price, for all possible sizes
-            sizes = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='flex items-center variable-items']")))
+            sizes = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='flex items-center variable-items']/li")))
+            print(f'There are {len(sizes)} sizes')
+            # add logic to check whether there is more than one size. If there is more than one flavour, always click chocolate click, so that all sizes are available
             product_sizes = []
-            for size in sizes:
+            
+
+            for i in range(len(sizes)):
                 # click that size
                 try:
-                    size.click()
-                    product_size = size.text
+                    size_btn = WebDriverWait(driver,timeout).until(EC.element_to_be_clickable((By.XPATH, f"(//ul[@class='flex items-center variable-items']/li)[{i+1}]")))
+                    driver.execute_script("arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });", size_btn )
+                    print('attemp click')
+                    size_btn.click()
+                    product_size = size_btn.text
                 except StaleElementReferenceException as e:
                     print('Stale Element Exception Occured: Retrying')
                     tm.sleep(2)
-                    size.click()
-                    product_size = size.text
+                    size_btn = WebDriverWait(driver,timeout).until(EC.element_to_be_clickable((By.XPATH, f"(//ul[@class='flex items-center variable-items']/li)[{i+1}]")))
+                    driver.execute_script("arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });", size_btn)
+
+                    size_btn.click()
+                    product_size = size_btn.text
                 
                 # there is variation price (regular price), and sometimes variation sale price, which is discounted. check whether discounted price exists, if it does take
                 # that instead
@@ -119,7 +167,7 @@ if __name__ == "__main__":
 
       
 
-    print('COSTCO')
+    print('\nCOSTCO\n')
     driver.get(urls[2])
     #set language
     print('searching')
@@ -174,6 +222,8 @@ if __name__ == "__main__":
             
 
     print(f'finds: {finds}')
+    # with open('output.txt') as file:
+    #     file.write()
     #end driver
     print('quit driver')
     driver.quit()
