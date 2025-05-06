@@ -1,13 +1,14 @@
-import React from 'react'
+import React from "react";
 import Header from './components/Header'
-import Footer from './components/Footer'
 
-function App() {
+
+function App(){
   return(
     <div>
       <Header />
+      <p>body</p>
     </div>
   )
-} 
+}
 
 export default App
