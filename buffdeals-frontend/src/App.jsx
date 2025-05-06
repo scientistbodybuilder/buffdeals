@@ -1,14 +1,14 @@
 import React from "react";
 import Header from './components/Header'
+import Form from './components/Form'
 
 
-function App(){
+export default function App(){
   return(
-    <div>
+    <div className="flex flex-col items-center justify-center">
       <Header />
-      <p>body</p>
+      <Form />
     </div>
   )
 }
 
-export default App

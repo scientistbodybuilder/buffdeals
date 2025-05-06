@@ -1,9 +1,10 @@
 import React from 'react'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-    faGithub,
-    faLinkedin,
-    faInstagram
+    // faGithub,
+    // faLinkedin,
+    // faInstagram
+    faHandshake,
   } from "@fortawesome/free-solid-svg-icons";
 
 
@@ -11,26 +12,29 @@ import {
 
 const Header = () => {
     return(
-        <nav className='container bg-teal-400 .h-16 .flex .left-0 .top-0 .right-0 .z-100 .fixed .items-center .justify-between'>
-            <h2 className='.text-3xl .text-black .font-sans'>BuffDeals</h2>
-            <ul className='.items-center .flex .justify-evenly'>
+        <nav className='w-full px-10 mx-auto bg-[#49FCFC] h-24 flex left-0 top-0 right-0 z-100 fixed items-center justify-between'>
+            <h2 className='text-5xl text-[#3C3C3C] font-sans font-bold'>BUFF DEALS</h2>
+            <ul className='items-center flex justify-evenly gap-5'>
                 <li>
-                    <a href='' target='_blank'>
-                        <FontAwesomeIcon icon={faGithub} />
+                    <a href='https://github.com/scientistbodybuilder?tab=repositories' target='_blank' className='text-xl font-semibold text-[#3C3C3C]'>
+                        {/* <FontAwesomeIcon icon={faGithub} /> */}
+                        Github
                     </a>
                 </li>
 
 
                 <li>
-                    <a href='' target='_blank'>
-                        <FontAwesomeIcon icon={faLinkedin} />
+                    <a href='https://www.linkedin.com/in/ousman-jikineh/' target='_blank' className='text-xl font-semibold text-[#3C3C3C]'>
+                        {/* <FontAwesomeIcon icon={faLinkedin} /> */}
+                        Linkedin
                     </a>
                 </li>
 
 
                 <li>
-                    <a href='' target='_blank'>
-                        <FontAwesomeIcon icon={faInstagram} />
+                    <a href='https://www.instagram.com/ousmanjikineh/' target='_blank' className='text-xl font-semibold text-[#3C3C3C]'>
+                        {/* <FontAwesomeIcon icon={faInstagram} /> */}
+                        Instagram
                     </a>
                 </li>
 
