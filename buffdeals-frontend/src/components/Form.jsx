@@ -4,7 +4,7 @@ import Card from './Card'
 const Form = () => {
     const [formSubmitted,setFormSubmitted] = useState(false)
     const data = [{'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
+                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
                     },
                     {'name':'Supplement Name','href':'https://ca.myprotein.com/',
                         'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
@@ -19,43 +19,7 @@ const Form = () => {
                         'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
                     },
                     {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein' //12
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
+                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
                     },
                     {'name':'Supplement Name','href':'https://ca.myprotein.com/',
                         'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
@@ -79,7 +43,13 @@ const Form = () => {
                         'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
                     },
                     {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
+                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
+                    },
+                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
+                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
+                    },
+                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
+                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
                     },
                     {'name':'Supplement Name','href':'https://ca.myprotein.com/',
                         'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
@@ -88,7 +58,7 @@ const Form = () => {
                         'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
                     },
                     {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
+                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
                     },
                     {'name':'Supplement Name','href':'https://ca.myprotein.com/',
                         'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
@@ -97,10 +67,40 @@ const Form = () => {
                         'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
                     },
                     {'name':'Supplement Name','href':'https://ca.myprotein.com/',
+                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
+                    },
+                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
+                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
+                    },
+                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
+                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein' //12
+                    },
+                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
+                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
+                    },
+                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
+                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
+                    },
+                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
+                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
+                    },
+                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
                         'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
                     },
                     {'name':'Supplement Name','href':'https://ca.myprotein.com/',
                         'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
+                    },
+                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
+                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
+                    },
+                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
+                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
+                    },
+                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
+                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
+                    },
+                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
+                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
                     },
                     {'name':'Supplement Name','href':'https://ca.myprotein.com/',
                         'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
@@ -145,22 +145,22 @@ const Form = () => {
                 <form className='mx-auto w-100 flex flex-col justify-center items-center border border-gray-300 py-15 px-4 rounded-md'>
                     <div className='mb-5 w-10/12'>
                         <label className='block text-xl mb-2' for='supplement'> Supplement</label>
-                        <input className='border border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='supplement' name='supplement' type='text' required placeholder='whey protein'/>
+                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='supplement' name='supplement' type='text' required placeholder='whey protein'/>
                     </div>
                 
                     <div className='mb-5 w-10/12'>
                         <label className='block text-xl mb-2' for='weight'>Weight (lbs)</label>
-                        <input className='border border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='weight' name='weight' type='number' min={0}/>
+                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='weight' name='weight' type='number' min={0}/>
                     </div>
 
                     <div className='mb-5 w-10/12'>
                         <label className='block text-xl mb-2' for='min-price'>Min Price</label>
-                        <input className='border border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='min-price' name='min-price' type='number' min={0}/>
+                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='min-price' name='min-price' type='number' min={0}/>
                     </div>
 
                     <div className='mb-5 w-10/12'>
                         <label className='block text-xl mb-2' for='max-price'>Max Price</label>
-                        <input className='border border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='max-price' name='max-price' type='number' min={0}/>
+                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='max-price' name='max-price' type='number' min={0}/>
                     </div>
                     
                     <div className='mb-5 flex justify-between items-center w-10/12'>
@@ -174,7 +174,7 @@ const Form = () => {
                     </div>
                     
 
-                    <input className='border border-gray-300 bg-[#49FCFC] text-center text-3xl text-[#3C3C3C] font-bold py-1 px-7 rounded-xl cursor-default shadow-md transition hover:opacity-80' type='submit' value='Search'/>
+                    <input className='border border-gray-300 bg-[#49FCFC] text-center text-3xl text-[#3C3C3C] font-bold py-1 px-7 rounded-xl cursor-pointer shadow-md transition hover:opacity-80' type='submit' value='Search'/>
                 </form>
 
                 <div>
@@ -190,14 +190,14 @@ const Form = () => {
                 </div>
                 
                 {page === 0 && split_data.length>1 && (<div className='mt-16 flex items-center justify-center gap-4'>
-                     <button type='button' className='rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
+                     <button type='button' className=' cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
                      </div>)}
                 {page === (split_data.length-1) && split_data.length>1 && page!=0 && (<div className='mt-16 flex items-center justify-center gap-4'>
-                    <button type='button' className='rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
+                    <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
                     </div>)}
                 {page < (split_data.length-1) && page > 0 && (<div className='mt-16 flex items-center justify-center gap-4'>
-                    <button type='button' className='rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
-                    <button type='button' className='rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
+                    <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
+                    <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
                     </div>)}
 
             </div>
