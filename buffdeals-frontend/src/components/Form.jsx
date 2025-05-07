@@ -165,12 +165,12 @@ const Form = () => {
                     
                     <div className='mb-5 flex justify-between items-center w-10/12'>
                         <label className='text-xl' for='vegan'>Vegan</label>
-                        <input className='w-5 h-5' id='vegan' type="checkbox" name='vegan' value='Vegan'/>
+                        <input className='w-5 h-5' id='vegan' type="checkbox" name='vegan' value='Vegan' defaultChecked/>
                     </div>
 
                     <div className='mb-5 flex justify-between items-center w-10/12'>
                         <label className='text-xl' for='isolate'>Isolate</label>
-                        <input className='w-5 h-5' id='isolate' type="checkbox" name='isolate' value='Isolate'/>
+                        <input className='w-5 h-5' id='isolate' type="checkbox" name='isolate' value='Isolate' defaultChecked/>
                     </div>
                     
 
