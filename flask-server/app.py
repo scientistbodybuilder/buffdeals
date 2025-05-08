@@ -1,13 +1,16 @@
-from flask import Flask
-import request
+from flask import Flask, request
 
 app = Flask(__name__)
 
-def scrape(supplement=str):
+def scrape(supplement,weight,max_price,min_price,vegan,isolate):
+    return []
+
+@app.route('/')
+def main():
     pass
 
-@app.route('/get-supplement')
-def get_supplements(methods=['POST']):
+@app.route('/get-supplement',methods=['POST'])
+def get_supplements():
     if request.method=="POST":
         print('beginning scraping')
      
@@ -25,3 +28,4 @@ def get_supplements(methods=['POST']):
 
 if __name__ == '__main__':
     app.run(debug=True)
+    print('server is running')
