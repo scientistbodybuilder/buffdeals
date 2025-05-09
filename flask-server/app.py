@@ -323,15 +323,16 @@ def get_supplements():
         print('beginning scraping')
      
         
-        search_supplement = request.form['supplement']
-        search_weight = request.form['weight']
-        max_price = request.form['max-price']
-        min_price = request.form['min-price']
-        vegan = request.form['vegan']
-        isolate = request.form['isolate']
+        # search_supplement = request.form['supplement']
+        # search_weight = request.form['weight']
+        # max_price = request.form['max-price']
+        # min_price = request.form['min-price']
+        # vegan = request.form['vegan']
+        # isolate = request.form['isolate']
 
 
-        result = scrape(search_supplement,search_weight,max_price,min_price,vegan,isolate)
+        # result = scrape(search_supplement,search_weight,max_price,min_price,vegan,isolate)
+        result = ['data']
         return result
 
 if __name__ == '__main__':

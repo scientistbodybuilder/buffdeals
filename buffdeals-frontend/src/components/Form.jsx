@@ -140,21 +140,27 @@ const Form = () => {
             console.log(`new page: ${page}`)
         }
 
-        const Submit = () => {
-            fetch('/get-supplement').then(
-                res =>  res.json().then(
-                    data => {setData(data)
-                    console.log(data)
+        const Submit = (e) => {
+            e.preventDefault()
+            console.log('submission clicked')
+            fetch('/get-supplement')
+                .then(res => {
+                    if (!res.ok) {
+                    throw new Error('Network response was not ok');
                     }
-                )
-            )
-            
+                    return res.json();
+                })
+                .then(data => {
+                    setData(data);
+                    console.log(data);
+                })
+                            
         }
 
     return(
         <section className='flex flex-col items-center justify-center w-full px-10 mt-24 mb-5'>
             <div className='flex items-center justify-evenly h-auto mt-16'>
-                <form className='mx-auto w-100 flex flex-col justify-center items-center border border-gray-300 py-15 px-4 rounded-md'>
+                <form className='mx-auto w-100 flex flex-col justify-center items-center border border-gray-300 py-15 px-4 rounded-md' onSubmit={Submit}>
                     <div className='mb-5 w-10/12'>
                         <label className='block text-xl mb-2' for='supplement'> Supplement</label>
                         <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='supplement' name='supplement' type='text' required placeholder='whey protein'/>
@@ -186,7 +192,7 @@ const Form = () => {
                     </div>
                     
 
-                    <input className='border border-gray-300 bg-[#49FCFC] text-center text-3xl text-[#3C3C3C] font-bold py-1 px-7 rounded-xl cursor-pointer shadow-md transition hover:opacity-80' type='submit' value='Search' onSubmit={()=>Submit}/>
+                    <input className='border border-gray-300 bg-[#49FCFC] text-center text-3xl text-[#3C3C3C] font-bold py-1 px-7 rounded-xl cursor-pointer shadow-md transition hover:opacity-80' type='submit' value='Search'/>
                 </form>
 
                 <div>
