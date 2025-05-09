@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react'
 import Card from './Card'
 
 const Form = () => {
-    const [formSubmitted,setFormSubmitted] = useState(false)
-    const data = [{'name':'Supplement Name','href':'https://ca.myprotein.com/',
+    const [data,setData] = useState(false)
+    const [loading,isLoading] = useState(false)
+    const test = [{'name':'Supplement Name','href':'https://ca.myprotein.com/',
                         'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
                     },
                     {'name':'Supplement Name','href':'https://ca.myprotein.com/',
@@ -124,7 +125,7 @@ const Form = () => {
             console.log(split)
             return split
         }
-        const split_data = SplitData(data)
+        const split_data = SplitData(test)
         const [page,setPage] = useState(0)
 
         const Next = () => {
@@ -137,6 +138,17 @@ const Form = () => {
             console.log('prev page')
             setPage(c=>c-1)
             console.log(`new page: ${page}`)
+        }
+
+        const Submit = () => {
+            fetch('/get-supplement').then(
+                res =>  res.json().then(
+                    data => {setData(data)
+                    console.log(data)
+                    }
+                )
+            )
+            
         }
 
     return(
@@ -174,7 +186,7 @@ const Form = () => {
                     </div>
                     
 
-                    <input className='border border-gray-300 bg-[#49FCFC] text-center text-3xl text-[#3C3C3C] font-bold py-1 px-7 rounded-xl cursor-pointer shadow-md transition hover:opacity-80' type='submit' value='Search'/>
+                    <input className='border border-gray-300 bg-[#49FCFC] text-center text-3xl text-[#3C3C3C] font-bold py-1 px-7 rounded-xl cursor-pointer shadow-md transition hover:opacity-80' type='submit' value='Search' onSubmit={()=>Submit}/>
                 </form>
 
                 <div>
