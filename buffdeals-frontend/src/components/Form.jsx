@@ -4,6 +4,27 @@ import Card from './Card'
 const Form = () => {
     const [data,setData] = useState(false)
     const [loading,isLoading] = useState(false)
+    const [formData, setFormData] = useState({
+        'supplement':'',
+        'weight':'',
+        'min-price':'',
+        'max-price':'',
+    })
+    const [state, setState] = useState({
+        'vegan': true,
+        'isolate': false
+    })
+
+    const handleToggle = ({ target }) =>
+        setState(s => ({ ...s, [target.name]: !s[target.name] }));
+
+    const handleChange = (e) => {
+        setFormData((prev) => ({
+        ...prev,
+        [e.target.name]: e.target.value,
+        }));
+        console.log(`new form data: ${formData['supplement']}`)
+    };
     const test = [{'name':'Supplement Name','href':'https://ca.myprotein.com/',
                         'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
                     },
@@ -116,35 +137,44 @@ const Form = () => {
     
         const SplitData = (data) => {
             const pages = Math.ceil(data.length / 12)
-            console.log(`pages: ${pages}`)
+            // console.log(`pages: ${pages}`)
             const split = []
             for (let i=0;i<pages;i++){
                 let c = data.slice(i*12,(i+1)*12)
                 split[i] = c
             }
-            console.log(split)
             return split
         }
         const split_data = SplitData(test)
         const [page,setPage] = useState(0)
 
         const Next = () => {
-            console.log('next page')
             setPage(c=>c+1)
-            console.log(`new page: ${page}`)
         }
 
         const Back = () => {
-            console.log('prev page')
             setPage(c=>c-1)
-            console.log(`new page: ${page}`)
         }
 
-        const Submit = (e) => {
+        const Submit = async (e) => {
             e.preventDefault()
             console.log('submission clicked')
-            fetch('/get-supplement')
-                .then(res => {
+            fetch('http://localhost:5000'+'/get-supplement',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':'application/json'
+                    },
+                    body: JSON.stringify({
+                        'supplement':formData.supplement,
+                        'weight':formData.weight,
+                        'max_price':formData['max-price'],
+                        'min_price':formData['min-price'],
+                        'vegan':state.vegan,
+                        'isolate':state.isolate
+                    })
+                }
+            ).then(res => {
                     if (!res.ok) {
                     throw new Error('Network response was not ok');
                     }
@@ -153,6 +183,9 @@ const Form = () => {
                 .then(data => {
                     setData(data);
                     console.log(data);
+                })
+                .catch(error => {
+                    console.error(error)
                 })
                             
         }
@@ -163,33 +196,48 @@ const Form = () => {
                 <form className='mx-auto w-100 flex flex-col justify-center items-center border border-gray-300 py-15 px-4 rounded-md' onSubmit={Submit}>
                     <div className='mb-5 w-10/12'>
                         <label className='block text-xl mb-2' for='supplement'> Supplement</label>
-                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='supplement' name='supplement' type='text' required placeholder='whey protein'/>
+                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='supplement' name='supplement' type='text' required placeholder='whey protein' onChange={handleChange}/>
                     </div>
                 
                     <div className='mb-5 w-10/12'>
                         <label className='block text-xl mb-2' for='weight'>Weight (lbs)</label>
-                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='weight' name='weight' type='number' min={0}/>
+                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='weight' name='weight' type='number' min={0} onChange={handleChange}/>
                     </div>
 
                     <div className='mb-5 w-10/12'>
                         <label className='block text-xl mb-2' for='min-price'>Min Price</label>
-                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='min-price' name='min-price' type='number' min={0}/>
+                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='min-price' name='min-price' type='number' min={0} onChange={handleChange}/>
                     </div>
 
                     <div className='mb-5 w-10/12'>
                         <label className='block text-xl mb-2' for='max-price'>Max Price</label>
-                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='max-price' name='max-price' type='number' min={0}/>
+                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='max-price' name='max-price' type='number' min={0} onChange={handleChange}/>
                     </div>
                     
-                    <div className='mb-5 flex justify-between items-center w-10/12'>
+                    {/* <div className='mb-5 flex justify-between items-center w-10/12'>
                         <label className='text-xl' for='vegan'>Vegan</label>
-                        <input className='w-5 h-5' id='vegan' type="checkbox" name='vegan' value='Vegan' defaultChecked/>
+                        <input className='w-5 h-5' id='vegan' type="checkbox" name='vegan' value='Vegan' defaultChecked onChange={handleCheckBox}/>
                     </div>
 
                     <div className='mb-5 flex justify-between items-center w-10/12'>
                         <label className='text-xl' for='isolate'>Isolate</label>
-                        <input className='w-5 h-5' id='isolate' type="checkbox" name='isolate' value='Isolate' defaultChecked/>
-                    </div>
+                        <input className='w-5 h-5' id='isolate' type="checkbox" name='isolate' value='Isolate' defaultChecked onChange={handleCheckBox}/>
+                    </div> */}
+
+                    {Object.keys(state).map(key => (
+                        <div className='mb-5 flex justify-between items-center w-10/12'>
+                            <label className='text-xl' for={key}>{String(key).charAt(0).toUpperCase() + String(key).slice(1)}</label>
+                            <input
+                            className='w-5 h-5'
+                            type="checkbox"
+                            onChange={handleToggle}
+                            key={key}
+                            name={key}
+                            checked={state[key]}
+                            defaultChecked
+                            />
+                        </div>                      
+                    ))}
                     
 
                     <input className='border border-gray-300 bg-[#49FCFC] text-center text-3xl text-[#3C3C3C] font-bold py-1 px-7 rounded-xl cursor-pointer shadow-md transition hover:opacity-80' type='submit' value='Search'/>
@@ -203,7 +251,7 @@ const Form = () => {
             <div className='flex flex-col items-center justify-center mx-auto w-2/3 mt-16'>
                 <div className='grid grid-cols-[repeat(auto-fit,minmax(380px,1fr))] gap-4 w-full place-items-center'>
                     {split_data[page].map((item) => (               
-                        <Card supplement_name={item['name']} brand={item['brand']} sizes={item['sizes']} />                        
+                        <Card supplement_name={item['name']} brand={item['brand']} sizes={item['sizes']} url={''}/>                        
                     ))}
                 </div>
                 
