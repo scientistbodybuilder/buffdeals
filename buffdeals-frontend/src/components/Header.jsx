@@ -10,7 +10,6 @@ const Header = () => {
             <ul className='items-center flex justify-evenly gap-5'>
                 <li>
                     <a href='https://github.com/scientistbodybuilder?tab=repositories' target='_blank' aria-label='Github'>
-                    {/* <CIcon icon={cibGithub} size="xxl"/> */}
                     <FaGithub size={45}/>
                     </a>
                 </li>

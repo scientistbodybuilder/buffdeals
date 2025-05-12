@@ -3,12 +3,12 @@ import Card from './Card'
 
 const Form = () => {
     const [data,setData] = useState(false)
-    const [loading,isLoading] = useState(false)
+    const [loading,setLoading] = useState(false)
     const [formData, setFormData] = useState({
         'supplement':'',
         'weight':'',
-        'min-price':'',
-        'max-price':'',
+        'min_price':'',
+        'max_price':'',
     })
     const [state, setState] = useState({
         'vegan': true,
@@ -158,35 +158,44 @@ const Form = () => {
 
         const Submit = async (e) => {
             e.preventDefault()
-            console.log('submission clicked')
-            fetch('http://localhost:5000'+'/get-supplement',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type':'application/json'
-                    },
-                    body: JSON.stringify({
-                        'supplement':formData.supplement,
-                        'weight':formData.weight,
-                        'max_price':formData['max-price'],
-                        'min_price':formData['min-price'],
-                        'vegan':state.vegan,
-                        'isolate':state.isolate
-                    })
-                }
-            ).then(res => {
-                    if (!res.ok) {
-                    throw new Error('Network response was not ok');
+            setLoading(true)
+            
+            if (formData.min_price == '' | formData.max_price == '' | formData.min_price < formData.max_price ) {
+                console.log('request made')
+                fetch('http://localhost:5000'+'/get-supplement',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type':'application/json'
+                        },
+                        body: JSON.stringify({
+                            'supplement':formData.supplement,
+                            'weight':formData.weight,
+                            'max_price':formData.max_price,
+                            'min_price':formData.min_price,
+                            'vegan':state.vegan,
+                            'isolate':state.isolate
+                        })
                     }
-                    return res.json();
-                })
-                .then(data => {
-                    setData(data);
-                    console.log(data);
-                })
-                .catch(error => {
-                    console.error(error)
-                })
+                ).then(res => {
+                        if (!res.ok) {
+                        throw new Error('Network response was not ok');
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        setData(data);
+                        console.log(data);
+                    })
+                    .catch(error => {
+                        console.error(error)
+                    }).finally(
+                        setLoading(false)
+                    )
+
+            } else {
+                console.log('problem with request')
+            }
                             
         }
 
@@ -205,24 +214,14 @@ const Form = () => {
                     </div>
 
                     <div className='mb-5 w-10/12'>
-                        <label className='block text-xl mb-2' for='min-price'>Min Price</label>
-                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='min-price' name='min-price' type='number' min={0} onChange={handleChange}/>
+                        <label className='block text-xl mb-2' for='min_price'>Min Price</label>
+                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='min_price' name='min_price' type='number' min={0} onChange={handleChange}/>
                     </div>
 
                     <div className='mb-5 w-10/12'>
-                        <label className='block text-xl mb-2' for='max-price'>Max Price</label>
-                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='max-price' name='max-price' type='number' min={0} onChange={handleChange}/>
+                        <label className='block text-xl mb-2' for='max_price'>Max Price</label>
+                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='max_price' name='max_price' type='number' min={0} onChange={handleChange}/>
                     </div>
-                    
-                    {/* <div className='mb-5 flex justify-between items-center w-10/12'>
-                        <label className='text-xl' for='vegan'>Vegan</label>
-                        <input className='w-5 h-5' id='vegan' type="checkbox" name='vegan' value='Vegan' defaultChecked onChange={handleCheckBox}/>
-                    </div>
-
-                    <div className='mb-5 flex justify-between items-center w-10/12'>
-                        <label className='text-xl' for='isolate'>Isolate</label>
-                        <input className='w-5 h-5' id='isolate' type="checkbox" name='isolate' value='Isolate' defaultChecked onChange={handleCheckBox}/>
-                    </div> */}
 
                     {Object.keys(state).map(key => (
                         <div className='mb-5 flex justify-between items-center w-10/12'>
@@ -248,25 +247,33 @@ const Form = () => {
                 
             </div>
 
-            <div className='flex flex-col items-center justify-center mx-auto w-2/3 mt-16'>
-                <div className='grid grid-cols-[repeat(auto-fit,minmax(380px,1fr))] gap-4 w-full place-items-center'>
-                    {split_data[page].map((item) => (               
-                        <Card supplement_name={item['name']} brand={item['brand']} sizes={item['sizes']} url={''}/>                        
-                    ))}
-                </div>
-                
-                {page === 0 && split_data.length>1 && (<div className='mt-16 flex items-center justify-center gap-4'>
-                     <button type='button' className=' cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
-                     </div>)}
-                {page === (split_data.length-1) && split_data.length>1 && page!=0 && (<div className='mt-16 flex items-center justify-center gap-4'>
-                    <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
-                    </div>)}
-                {page < (split_data.length-1) && page > 0 && (<div className='mt-16 flex items-center justify-center gap-4'>
-                    <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
-                    <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
-                    </div>)}
+            {
+                loading ? (
+                    <img src='../assets/spinner-200px-200px.svg' />
+                ) : (
+                    <div className='flex flex-col items-center justify-center mx-auto w-2/3 mt-16'>
+                        <div className='grid grid-cols-[repeat(auto-fit,minmax(380px,1fr))] gap-4 w-full place-items-center'>
+                            {split_data[page].map((item) => (               
+                                <Card supplement_name={item['name']} brand={item['brand']} sizes={item['sizes']} url={''}/>                        
+                            ))}
+                        </div>
+                        
+                        {page === 0 && split_data.length>1 && (<div className='mt-16 flex items-center justify-center gap-4'>
+                            <button type='button' className=' cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
+                            </div>)}
+                        {page === (split_data.length-1) && split_data.length>1 && page!=0 && (<div className='mt-16 flex items-center justify-center gap-4'>
+                            <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
+                            </div>)}
+                        {page < (split_data.length-1) && page > 0 && (<div className='mt-16 flex items-center justify-center gap-4'>
+                            <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
+                            <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
+                            </div>)}
 
-            </div>
+                    </div>
+                )
+            }
+
+            
         </section>
     )
 }
