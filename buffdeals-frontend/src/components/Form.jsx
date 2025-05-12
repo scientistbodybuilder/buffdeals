@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react'
 import Card from './Card'
 
 const Form = () => {
-    const [data,setData] = useState(false)
+    const [data,setData] = useState([])
+    const [splitData, setSplitData] = useState([])
     const [loading,setLoading] = useState(false)
+    const [page,setPage] = useState(0)
     const [formData, setFormData] = useState({
         'supplement':'',
         'weight':'',
@@ -25,179 +27,71 @@ const Form = () => {
         }));
         console.log(`new form data: ${formData['supplement']}`)
     };
-    const test = [{'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein' //12
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein' //12
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'},{'size':'3lb','price':'CA44.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein'
-                    },
-                    {'name':'Supplement Name','href':'https://ca.myprotein.com/',
-                        'sizes':[{'size':'6lb','price':'CA89.99'}],'brand':'My Protein' //12
-                    },
-                    ]
     
-        const SplitData = (data) => {
-            const pages = Math.ceil(data.length / 12)
-            // console.log(`pages: ${pages}`)
-            const split = []
-            for (let i=0;i<pages;i++){
-                let c = data.slice(i*12,(i+1)*12)
-                split[i] = c
-            }
-            return split
+    const SplitData = (data) => {
+        const pages = Math.ceil(data.length / 12)
+        // console.log(`pages: ${pages}`)
+        const split = []
+        for (let i=0;i<pages;i++){
+            let c = data.slice(i*12,(i+1)*12)
+            split[i] = c
         }
-        const split_data = SplitData(test)
-        const [page,setPage] = useState(0)
+        return split
+    }
+   
 
-        const Next = () => {
-            setPage(c=>c+1)
-        }
+    const Next = () => {
+        setPage(c=>c+1)
+    }
 
-        const Back = () => {
-            setPage(c=>c-1)
-        }
+    const Back = () => {
+        setPage(c=>c-1)
+    }
 
-        const Submit = async (e) => {
-            e.preventDefault()
-            setLoading(true)
-            
-            if (formData.min_price == '' | formData.max_price == '' | formData.min_price < formData.max_price ) {
-                console.log('request made')
-                fetch('http://localhost:5000'+'/get-supplement',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type':'application/json'
-                        },
-                        body: JSON.stringify({
-                            'supplement':formData.supplement,
-                            'weight':formData.weight,
-                            'max_price':formData.max_price,
-                            'min_price':formData.min_price,
-                            'vegan':state.vegan,
-                            'isolate':state.isolate
-                        })
+    const Submit = (e) => {
+        e.preventDefault()
+        setLoading(true)
+        
+        if (formData.min_price == '' | formData.max_price == '' | formData.min_price < formData.max_price ) {
+            console.log('request made')
+            fetch('http://localhost:5000'+'/get-supplement',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':'application/json'
+                    },
+                    body: JSON.stringify({
+                        'supplement':formData.supplement,
+                        'weight':formData.weight,
+                        'max_price':formData.max_price,
+                        'min_price':formData.min_price,
+                        'vegan':state.vegan,
+                        'isolate':state.isolate
+                    })
+                }
+            ).then(res => {
+                    if (!res.ok) {
+                    throw new Error('Network response was not ok');
                     }
-                ).then(res => {
-                        if (!res.ok) {
-                        throw new Error('Network response was not ok');
-                        }
-                        return res.json();
-                    })
-                    .then(data => {
-                        setData(data);
-                        console.log(data);
-                    })
-                    .catch(error => {
-                        console.error(error)
-                    }).finally(
-                        setLoading(false)
-                    )
+                    return res.json();
+                })
+                .then(data => {
+                    setData(data);
+                    console.log(data);
+                    setSplitData(SplitData(data))
+                })
+                .catch(error => {
+                    console.error(error)
+                }).finally(
+                    () => setLoading(false)
+                )
 
-            } else {
-                console.log('problem with request')
-            }
-                            
+        } else {
+            console.log('problem with request')
         }
+                        
+    }
+
 
     return(
         <section className='flex flex-col items-center justify-center w-full px-10 mt-24 mb-5'>
@@ -232,7 +126,6 @@ const Form = () => {
                             onChange={handleToggle}
                             key={key}
                             name={key}
-                            checked={state[key]}
                             defaultChecked
                             />
                         </div>                      
@@ -249,22 +142,23 @@ const Form = () => {
 
             {
                 loading ? (
-                    <img src='../assets/spinner-200px-200px.svg' />
+                    <img src='./spinner-200px-200px.svg' />
                 ) : (
                     <div className='flex flex-col items-center justify-center mx-auto w-2/3 mt-16'>
+                        <h2 className='mb-4 text-sm text-gray-500'>Products with '*' have more sizes</h2>
                         <div className='grid grid-cols-[repeat(auto-fit,minmax(380px,1fr))] gap-4 w-full place-items-center'>
-                            {split_data[page].map((item) => (               
-                                <Card supplement_name={item['name']} brand={item['brand']} sizes={item['sizes']} url={''}/>                        
+                            {splitData[page]?.map((item) => (               
+                                <Card supplement_name={item['name']} brand={item['brand']} sizes={item['sizes']} url={item['href']}/>                        
                             ))}
                         </div>
                         
-                        {page === 0 && split_data.length>1 && (<div className='mt-16 flex items-center justify-center gap-4'>
+                        {page === 0 && splitData.length>1 && (<div className='mt-16 flex items-center justify-center gap-4'>
                             <button type='button' className=' cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
                             </div>)}
-                        {page === (split_data.length-1) && split_data.length>1 && page!=0 && (<div className='mt-16 flex items-center justify-center gap-4'>
+                        {page === (splitData.length-1) && splitData.length>1 && page!=0 && (<div className='mt-16 flex items-center justify-center gap-4'>
                             <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
                             </div>)}
-                        {page < (split_data.length-1) && page > 0 && (<div className='mt-16 flex items-center justify-center gap-4'>
+                        {page < (splitData.length-1) && page > 0 && (<div className='mt-16 flex items-center justify-center gap-4'>
                             <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
                             <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
                             </div>)}

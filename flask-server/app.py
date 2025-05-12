@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173"])
+CORS(app, origins=["http://localhost:5173"], resources={r'/get-supplement': {'origins':'*'}})
 
 def scrape(supplement,weight,max_price,min_price,vegan,isolate):
     service = Service(ChromeDriverManager().install())
@@ -22,6 +22,7 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
     # options.add_argument(r'--user-data-dir=C:\Users\ser\AppData\Local\Google\Chrome\User Data\Default')
     options.add_argument("--window-size=2560,1600")
     options.add_argument('--log-level=1')
+    options.add_argument("--headerless=new")
     driver = webdriver.Chrome(service=service, options=options)
     urls = ['https://ca.myprotein.com/','https://revolution-nutrition.com/','https://www.costco.ca/','https://canadianprotein.com/search']
     finds = []
@@ -32,14 +33,13 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
     search_bar  = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[id='search-input-desktop']")))
     search_bar.clear()
     search_bar.send_keys('whey protein')
-    search_btn = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.CSS_SELECTOR, "button[aria-label='search button']"))).click()
 
     print('beginning iteration')
 
-    container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, ".//ul[@id='product-blocks']/li")))
+    container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//ul[@id='product-blocks']/li")))
     print(f'There are {len(container)} products')
     for i in range(len(container)):
-        container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, ".//ul[@id='product-blocks']/li")))
+        container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//ul[@id='product-blocks']/li")))
         # get the product name and url to it's page
         try:
             product_href = container[i].find_element(By.XPATH, './/a').get_attribute("href")
@@ -286,24 +286,42 @@ def get_supplements():
         
         data = request.get_json()
         print(data)
-        search_supplement = data.supplement
-        print(f'supplement: {search_supplement}')
-        search_weight = data.weight
-        print(f'weight: {search_weight}')
-        max_price = data.max_price
-        print(f'max-price: {max_price}')
-        min_price = data.min_price
-        print(f'min-price: {min_price}')
-        vegan = data.vegan
+        supplement = data['supplement']
+        weight = data['weight']
+        max_price = data['max_price']
+        min_price = data['min_price']
+        vegan = data['vegan']  
+        isolate = data['isolate']
+        
+        if min_price:
+            min_price = float(min_price)
+        if max_price:
+            max_price = float(max_price)
+        if weight:
+            weight = float(weight)
+
+        print(f'supplement: {supplement}')
+        print(f'weight: {weight}')
+        print(f'max price: {max_price}')
+        print(f'min price: {min_price}')
         print(f'vegan: {vegan}')
-        isolate = data.isolate
         print(f'isolate: {isolate}')
 
 
-        # results = scrape(search_supplement,search_weight,max_price,min_price,vegan,isolate)
+
+        results = scrape(supplement,weight,max_price,min_price,vegan,isolate)
+        trunc_len = 50
+        for i in range(len(results)):
+            name = results[i]['name']
+            if len(name) >= trunc_len:
+                trunc = name[:trunc_len]
+                s = trunc.split()
+                s = s.pop()
+                new_name = ' '.join(s) + '...'
+                results[i]['name'] = new_name
+
             
-        result = ['data']
-        response = jsonify(result)
+        response = jsonify(results)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
 
