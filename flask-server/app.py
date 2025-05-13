@@ -10,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 import time as tm, os, subprocess
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException, NoSuchElementException, ElementNotInteractableException
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173"], resources={r'/get-supplement': {'origins':'*'}})
@@ -33,8 +33,17 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
     search_bar  = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[id='search-input-desktop']")))
     search_bar.clear()
     search_bar.send_keys('whey protein')
+    search_btn = WebDriverWait(driver,timeout).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[aria-label='search button']"))).click()
+
 
     print('beginning iteration')
+    tm.sleep(2)
+    try:
+        WebDriverWait(driver,timeout=15).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='overlayContainer']/div/div/button[@id='closeIconContainer']"))).click()
+        print('pop-up closed')
+    except (NoSuchElementException, ElementNotInteractableException,TimeoutException):
+        print('no pop-up detected')
+        pass
 
     container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//ul[@id='product-blocks']/li")))
     print(f'There are {len(container)} products')
@@ -134,11 +143,18 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
     search_bar.clear()
     search_bar.send_keys('whey protein')
     search_bar.send_keys(Keys.RETURN)
+
+    #pop up
+    
     #page iteration
     page_num = 1
     while True:
         print(f'page: {page_num}')
         print('beginning iteration')
+        tm.sleep(2)
+        
+
+        
         try:
             container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//div[@class='hdt-shop-content']/hdt-reval-items/hdt-card-product")))
             print(f'There are {len(container)} products')
@@ -310,14 +326,14 @@ def get_supplements():
 
 
         results = scrape(supplement,weight,max_price,min_price,vegan,isolate)
-        trunc_len = 50
+        trunc_len = 40
+        print('Truncating')
         for i in range(len(results)):
             name = results[i]['name']
+            print(name)
             if len(name) >= trunc_len:
                 trunc = name[:trunc_len]
-                s = trunc.split()
-                s = s.pop()
-                new_name = ' '.join(s) + '...'
+                new_name = trunc.strip() + '...'
                 results[i]['name'] = new_name
 
             

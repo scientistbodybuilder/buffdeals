@@ -26,11 +26,12 @@ if __name__ == "__main__":
     # options.add_argument(r'--user-data-dir=C:\Users\ser\AppData\Local\Google\Chrome\User Data\Default')
     options.add_argument("--window-size=2560,1600")
     options.add_argument('--log-level=1')
+    options.add_argument("--headerless=new")
     driver = webdriver.Chrome(service=service, options=options)
     urls = ['https://ca.myprotein.com/','https://revolution-nutrition.com/','https://www.costco.ca/','https://canadianprotein.com/search']
     finds = []
     timeout = 30
-
+    errors = 0
     print('\nREVOLUTION NUTRITION\n')
     driver.get(urls[1])
     search_bar  = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[id='search-input-desktop']")))
@@ -40,10 +41,10 @@ if __name__ == "__main__":
 
     print('beginning iteration')
 
-    container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, ".//ul[@id='product-blocks']/li")))
+    container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//ul[@id='product-blocks']/li")))
     print(f'There are {len(container)} products')
     for i in range(len(container)):
-        container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, ".//ul[@id='product-blocks']/li")))
+        container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//ul[@id='product-blocks']/li")))
         # get the product name and url to it's page
         try:
             product_href = container[i].find_element(By.XPATH, './/a').get_attribute("href")
@@ -85,6 +86,7 @@ if __name__ == "__main__":
                 except Exception as e:
                     print('Exception Occured')
                     print(e)
+                    errors+=1
                     continue
                 
                 # there is variation price (regular price), and sometimes variation sale price, which is discounted. check whether discounted price exists, if it does take
@@ -100,6 +102,7 @@ if __name__ == "__main__":
                 except Exception as e:
                     print('Exception Occured')
                     print(e)
+                    errors+=1
                     continue
                 if not product_price:
                     try:
@@ -113,6 +116,7 @@ if __name__ == "__main__":
                     except Exception as e:
                         print('Exception Occured')
                         print(e)
+                        errors+=1
                         continue
                     
                 
@@ -163,6 +167,11 @@ if __name__ == "__main__":
                 product_href = product.find_element(By.XPATH, ".//a").get_attribute("href")
                 html = product.find_element(By.XPATH, ".//a").get_attribute("outerHTML")
                 product_title = html.split('>')[1][:-3]
+            except Exception as e:
+                print('Exception Occured')
+                print(e)
+                errors+=1
+                continue
             print(f'product href: {product_href}')
             print(f'product title: {product_title}')
 
@@ -192,6 +201,7 @@ if __name__ == "__main__":
                             except Exception as e:
                                 print('Exception Occured')
                                 print(e)
+                                errors+=1
                                 continue
 
                             try:
@@ -203,6 +213,7 @@ if __name__ == "__main__":
                             except Exception as e:
                                 print('Exception Occured')
                                 print(e)
+                                errors+=1
                                 continue
 
 
@@ -265,5 +276,6 @@ if __name__ == "__main__":
     #end driver
     print('quit driver')
     driver.quit()
+    print(f'There were {errors} errors')
 else:
     print('not on main')
