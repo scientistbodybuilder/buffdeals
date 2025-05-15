@@ -7,6 +7,10 @@ const Form = () => {
         const storedData = localStorage.getItem('SCRAPE_DATA')
         return storedData ? JSON.parse(storedData) : []
     })
+    const [formSubmitted, setFormSubmitted] = useState(()=>{
+        const submission = localStorage.getItem('FORM_SUBMISSION')
+        return submission ? true : false
+    })
     const [loading,setLoading] = useState(false)
     const [page,setPage] = useState(0)
     const [formData, setFormData] = useState({
@@ -18,7 +22,7 @@ const Form = () => {
     //loading.io for spinner
     const [state, setState] = useState({
         'vegan': true,
-        'isolate': false
+        'isolate': true
     })
 
     useEffect(() => {
@@ -32,6 +36,10 @@ const Form = () => {
     useEffect(() => {
         window.localStorage.setItem('SCRAPE_DATA',JSON.stringify(splitData))
     }, [splitData])
+
+    useEffect(() => {
+        window.localStorage.setItem('FORM_SUBMISSION', formSubmitted)
+    }, [formSubmitted])
 
     
 
@@ -69,6 +77,7 @@ const Form = () => {
     const Submit = (e) => {
         e.preventDefault()
         setLoading(true)
+        setFormSubmitted(true)
         
         if (formData.min_price == '' | formData.max_price == '' | formData.min_price < formData.max_price ) {
             console.log('request made')
@@ -108,6 +117,54 @@ const Form = () => {
             console.log('problem with request')
         }
                         
+    }
+
+    function comparePrice(a, b) {
+        const pricea = a['sizes'][0]['price']
+        const priceb = b['sizes'][0]['price']
+        if (pricea < priceb) {
+            return -1;
+        } else if (pricea > priceb) {
+            return 1;
+        }
+        // a must be equal to b
+        return 0;
+    }
+    
+    function compareSize(a, b) {
+        const pricea = a['sizes'][0]['size']
+        const priceb = b['sizes'][0]['size']
+        if (pricea < priceb) {
+            return -1;
+        } else if (pricea > priceb) {
+            return 1;
+        }
+        // a must be equal to b
+        return 0;
+    }
+
+    function compareValue(a, b) {
+        const pricea = a['sizes'][0]['value']
+        const priceb = b['sizes'][0]['value']
+        if (pricea < priceb) {
+            return -1;
+        } else if (pricea > priceb) {
+            return 1;
+        }
+        // a must be equal to b
+        return 0;
+    }
+    
+
+
+    const Sort = (by) => {
+        if (by=='Price'){
+            console.log('Sorting by price')
+        } else if (by=='Size'){
+            console.log('Sorting by size')
+        } else {
+            console.log('Sorting by value')
+        }
     }
 
 
@@ -159,11 +216,19 @@ const Form = () => {
             </div>
 
             {
-                loading ? (
+                (loading && formSubmitted) ? (
                     <img src='./spinner-200px-200px.svg' />
                 ) : (
                     <div className='flex flex-col items-center justify-center mx-auto w-2/3 mt-16'>
                         <h2 className='mb-4 text-sm text-gray-500 font-bold'>Products with '*' have more sizes</h2>
+                        <div className='mb-2 w-full mt-2 px-5'>
+                            <ul className='flex gap-2 items-center'>
+                                <li className='text-lg font-semibold'>Sort By</li>
+                                <li className='border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100' onClick={() => Sort('Size')}>Size</li>
+                                <li className='border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100' onClick={() => Sort('Price')}>Price</li>
+                                <li className='border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100' onClick={() => Sort('Value')}>Value</li>
+                            </ul>
+                        </div>
                         <div className='grid grid-cols-[repeat(auto-fit,minmax(380px,1fr))] gap-4 w-full place-items-center'>
                             {splitData[page]?.map((item) => (               
                                 <Card supplement_name={item['name']} brand={item['brand']} sizes={item['sizes']} url={item['href']}/>                        

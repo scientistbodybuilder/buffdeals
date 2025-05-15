@@ -15,7 +15,16 @@ from selenium.common.exceptions import StaleElementReferenceException, TimeoutEx
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173"], resources={r'/get-supplement': {'origins':'*'}})
 
+def num_products(products):
+    count = 0
+    for product in products:
+        count += len(product['sizes'])
+    return count
+
 def scrape(supplement,weight,max_price,min_price,vegan,isolate):
+    search_supplement = supplement.strip().split()
+    pattern = r'.*'.join(search_supplement)
+
     service = Service(ChromeDriverManager().install())
     options = Options()
     #options.add_argument(f'--proxy-server=={}')
@@ -60,8 +69,8 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
             product_title = container[i].find_element(By.XPATH, ".//a/div/h2/span").text
 
         print(f'title: {product_title}')
-
-        if re.search(r'.*whey.*(protein)*.*',product_title.lower()):
+        
+        if re.search(rf'{pattern}',product_title.lower()) and (not vegan or (vegan and product_title.lower().find('vegan') != -1)) and (not isolate or (isolate and product_title.lower().find('isolate') != -1)):
             driver.get(product_href)
             find = {'name':product_title}
             find['brand'] = 'Revolution Nutrition'
@@ -186,7 +195,7 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
             print(f'product href: {product_href}')
             print(f'product title: {product_title}')
 
-            if re.search(r'.*whey.*(protein)*.*',product_title.lower()):
+            if re.search(rf'{pattern}',product_title.lower()) and (not vegan or (vegan and product_title.lower().find('vegan') != -1)) and (not isolate or (isolate and product_title.lower().find('isolate') != -1)):
                 driver.get(product_href)
                 find = {'name':product_title}
                 find['brand'] = 'Canadian Protein'
@@ -326,6 +335,31 @@ def get_supplements():
 
 
         results = scrape(supplement,weight,max_price,min_price,vegan,isolate)
+
+        #Post Filtering
+        print(f'We have {num_products(results)} before filtering')
+        #MAX PRICE
+        if max_price:
+            for find in results:
+                find['sizes'] = [x for x in find['sizes'] if x['price'] <= max_price]
+
+        #MIN PRICE
+        if min_price:
+            for find in results:
+                find['sizes'] = [x for x in find['sizes'] if x['price'] >= min_price]
+
+        #WEIGHT
+        if weight:
+            for find in results:
+                find['sizes'] = [x for x in find['sizes'] if abs(float(''.join([c for c in x['size'] if c.isdigit()])) - float(weight)) <= 1]
+
+        print(f'We have {num_products(results)} after filtering')
+
+        
+
+
+
+        #Truncate names
         trunc_len = 40
         print('Truncating')
         for i in range(len(results)):
