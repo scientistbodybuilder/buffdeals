@@ -1,6 +1,9 @@
 import React from 'react'
 
 const Card = (props) => {
+    console.log(`brand: ${props.brand}`)
+    console.log(`name: ${props.supplement_name}`)
+    console.log(`sizes: ${props.sizes}`)
     return(
         <div className='shadow-md rounded-lg h-24 w-full max-w-md px-4 py-2 border border-gray-300 cursor-pointer flex items-center justify-between hover:bg-gray-100'>
             <a href={props.url} target='_blank' className='w-full flex items-center justify-between'>

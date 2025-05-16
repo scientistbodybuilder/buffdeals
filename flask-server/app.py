@@ -21,6 +21,12 @@ def num_products(products):
         count += len(product['sizes'])
     return count
 
+def extract_num(text):
+    value =  ''.join([x for x in text if (x.isdigit() or x == '.')])
+    if value:
+        return float(value)
+    return 1.0
+
 def scrape(supplement,weight,max_price,min_price,vegan,isolate):
     search_supplement = supplement.strip().split()
     pattern = r'.*'.join(search_supplement)
@@ -68,10 +74,11 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
             product_href = container[i].find_element(By.XPATH, './/a').get_attribute("href")
             product_title = container[i].find_element(By.XPATH, ".//a/div/h2/span").text
 
-        print(f'title: {product_title}')
+        
         
         if re.search(rf'{pattern}',product_title.lower()) and (not vegan or (vegan and product_title.lower().find('vegan') != -1)) and (not isolate or (isolate and product_title.lower().find('isolate') != -1)):
             driver.get(product_href)
+            print(f'title: {product_title}')
             find = {'name':product_title}
             find['brand'] = 'Revolution Nutrition'
             # get the size and price, for all possible sizes
@@ -137,7 +144,8 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
                 print(f'price: {product_price}')
                 product_sizes.append({
                     'size':product_size,
-                    'price':product_price
+                    'price':product_price,
+                    'value': extract_num(product_size) / extract_num(product_price)
                 })
             find['sizes'] = product_sizes
             find['href'] = product_href
@@ -192,11 +200,12 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
                 print(e)
                 errors+=1
                 continue
-            print(f'product href: {product_href}')
-            print(f'product title: {product_title}')
+            
 
             if re.search(rf'{pattern}',product_title.lower()) and (not vegan or (vegan and product_title.lower().find('vegan') != -1)) and (not isolate or (isolate and product_title.lower().find('isolate') != -1)):
                 driver.get(product_href)
+                print(f'product href: {product_href}')
+                print(f'product title: {product_title}')
                 find = {'name':product_title}
                 find['brand'] = 'Canadian Protein'
                 product_sizes=[]
@@ -241,7 +250,8 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
                             print(f'price: {product_price}')
                             product_sizes.append({
                                 'size':product_size,
-                                'price':product_price
+                                'price':product_price,
+                                'value': extract_num(product_size) / extract_num(product_price)
                             })
                         find['sizes'] = product_sizes
                         find['href'] = product_href
@@ -263,7 +273,8 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
                     print(f'price: {product_price}')
                     product_sizes.append({
                         'size':product_size,
-                        'price':product_price
+                        'price':product_price,
+                        'value': extract_num(product_size) / extract_num(product_price)
                     })
                     find['sizes'] = product_sizes
                     find['href'] = product_href
@@ -338,20 +349,39 @@ def get_supplements():
 
         #Post Filtering
         print(f'We have {num_products(results)} before filtering')
+        #Pre processing
         #MAX PRICE
         if max_price:
-            for find in results:
-                find['sizes'] = [x for x in find['sizes'] if x['price'] <= max_price]
+            for i in range(len(results)):
+                product = results[i]
+                product['sizes'] = [x for x in product['sizes'] if float(''.join([c for c in x['price'] if (c.isdigit() or c=='.')])) <= max_price]
+                if product['sizes'] == []:
+                    product['keep'] = False
+                else:
+                    product['keep'] = True
+            results = [x for x in results if x['keep']]
 
         #MIN PRICE
         if min_price:
-            for find in results:
-                find['sizes'] = [x for x in find['sizes'] if x['price'] >= min_price]
+            for i in range(len(results)):
+                product = results[i]
+                product['sizes'] = [x for x in product['sizes'] if float(''.join([c for c in x['price'] if (c.isdigit() or c=='.')])) >= min_price]
+                if product['sizes'] == []:
+                    product['keep'] = False
+                else:
+                    product['keep'] = True
+            results = [x for x in results if x['keep']]
 
         #WEIGHT
         if weight:
-            for find in results:
-                find['sizes'] = [x for x in find['sizes'] if abs(float(''.join([c for c in x['size'] if c.isdigit()])) - float(weight)) <= 1]
+            for i in range(len(results)):
+                product = results[i]
+                product['sizes'] = [x for x in product['sizes'] if abs(float(''.join([c for c in x['size'] if (c.isdigit() or c=='.')])) - float(weight)) <= 1]
+                if product['sizes'] == []:
+                    product['keep'] = False
+                else:
+                    product['keep'] = True
+            results = [x for x in results if x['keep']]
 
         print(f'We have {num_products(results)} after filtering')
 
@@ -364,7 +394,6 @@ def get_supplements():
         print('Truncating')
         for i in range(len(results)):
             name = results[i]['name']
-            print(name)
             if len(name) >= trunc_len:
                 trunc = name[:trunc_len]
                 new_name = trunc.strip() + '...'

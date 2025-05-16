@@ -2,11 +2,28 @@ import React, { useState, useEffect } from 'react'
 import Card from './Card'
 
 const Form = () => {
-    const [data,setData] = useState([])
-    const [splitData, setSplitData] = useState(()=>{
+    const SplitData = (data) => {
+        const pages = Math.ceil(data.length / 12)
+        // console.log(`pages: ${pages}`)
+        const split = []
+        for (let i=0;i<pages;i++){
+            let c = data.slice(i*12,(i+1)*12)
+            split[i] = c
+        }
+        return split
+    }
+    
+    const [sortSetting,setSortSettingg] = useState(null)
+    const [data, setData] = useState(()=>{
         const storedData = localStorage.getItem('SCRAPE_DATA')
         return storedData ? JSON.parse(storedData) : []
     })
+
+    const [splitData,setSplitData] = useState(() => {
+        return data ? SplitData(data) : []
+    })
+
+
     const [formSubmitted, setFormSubmitted] = useState(()=>{
         const submission = localStorage.getItem('FORM_SUBMISSION')
         return submission ? true : false
@@ -26,16 +43,18 @@ const Form = () => {
     })
 
     useEffect(() => {
-        const split_data = window.localStorage.getItem('SCRAPE_DATA')
-        if (split_data != null){
-            setSplitData(JSON.parse(split_data))
+        const scrape_data = window.localStorage.getItem('SCRAPE_DATA')
+        if (scrape_data != null){
+            const parsed = JSON.parse(scrape_data)
+            setData(parsed)
+            setSplitData(SplitData(parsed))
         }
         
     },[])
 
     useEffect(() => {
-        window.localStorage.setItem('SCRAPE_DATA',JSON.stringify(splitData))
-    }, [splitData])
+        window.localStorage.setItem('SCRAPE_DATA',JSON.stringify(data))
+    }, [data])
 
     useEffect(() => {
         window.localStorage.setItem('FORM_SUBMISSION', formSubmitted)
@@ -54,16 +73,7 @@ const Form = () => {
         console.log(`new form data: ${formData['supplement']}`)
     };
     
-    const SplitData = (data) => {
-        const pages = Math.ceil(data.length / 12)
-        // console.log(`pages: ${pages}`)
-        const split = []
-        for (let i=0;i<pages;i++){
-            let c = data.slice(i*12,(i+1)*12)
-            split[i] = c
-        }
-        return split
-    }
+    
    
 
     const Next = () => {
@@ -158,12 +168,21 @@ const Form = () => {
 
 
     const Sort = (by) => {
-        if (by=='Price'){
-            console.log('Sorting by price')
-        } else if (by=='Size'){
-            console.log('Sorting by size')
-        } else {
-            console.log('Sorting by value')
+        if (by=='Price' && data.length > 0){
+            setSortSettingg('Price')
+            const sorted = data.sort(comparePrice)
+            setData(sorted)
+            setSplitData(SplitData(data))
+        } else if (by=='Size' && data.length > 0){
+            setSortSettingg('Size')
+            const sorted = data.sort(compareSize)
+            setData(sorted)
+            setSplitData(SplitData(data))
+        } else if (by=='Value' && data.length > 0) {
+            setSortSettingg('Value')
+            const sorted = data.sort(compareValue)
+            setData(sorted)
+            setSplitData(SplitData(data))
         }
     }
 
@@ -179,17 +198,17 @@ const Form = () => {
                 
                     <div className='mb-5 w-10/12'>
                         <label className='block text-xl mb-2' for='weight'>Weight (lbs)</label>
-                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='weight' name='weight' type='number' min={0} onChange={handleChange}/>
+                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='weight' name='weight' type='number' step="0.1" min={0} onChange={handleChange}/>
                     </div>
 
                     <div className='mb-5 w-10/12'>
                         <label className='block text-xl mb-2' for='min_price'>Min Price</label>
-                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='min_price' name='min_price' type='number' min={0} onChange={handleChange}/>
+                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='min_price' name='min_price' type='number' step="0.01" min={0} onChange={handleChange}/>
                     </div>
 
                     <div className='mb-5 w-10/12'>
                         <label className='block text-xl mb-2' for='max_price'>Max Price</label>
-                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='max_price' name='max_price' type='number' min={0} onChange={handleChange}/>
+                        <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='max_price' name='max_price' type='number' step="0.01" min={0} onChange={handleChange}/>
                     </div>
 
                     {Object.keys(state).map(key => (
@@ -224,9 +243,9 @@ const Form = () => {
                         <div className='mb-2 w-full mt-2 px-5'>
                             <ul className='flex gap-2 items-center'>
                                 <li className='text-lg font-semibold'>Sort By</li>
-                                <li className='border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100' onClick={() => Sort('Size')}>Size</li>
-                                <li className='border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100' onClick={() => Sort('Price')}>Price</li>
-                                <li className='border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100' onClick={() => Sort('Value')}>Value</li>
+                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100 ${sortSetting === 'Size' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Size')}>Size</li>
+                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100 ${sortSetting === 'Price' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Price')}>Price</li>
+                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100 ${sortSetting === 'Value' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Value')}>Value</li>
                             </ul>
                         </div>
                         <div className='grid grid-cols-[repeat(auto-fit,minmax(380px,1fr))] gap-4 w-full place-items-center'>
