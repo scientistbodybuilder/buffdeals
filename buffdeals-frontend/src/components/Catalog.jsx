@@ -1,51 +1,11 @@
 import React, {useState, useEffect} from 'react'
 import Card from './Card'
+import { FaSearch } from "react-icons/fa";
 
-const Catalog = (props) => {
-    const [splitData, setSplitData] = useState(()=>{
-        const storedData = localStorage.getItem('SCRAPE_DATA')
-        return storedData ? JSON.parse(storedData) : []
-    })
-
-    // const [loading,setLoading] = useState(false)
+const Catalog = () => {
+    const [loading, setLoading] = useState(false)
     const [page,setPage] = useState(0)
-    // const [formData, setFormData] = useState({
-    //     'supplement':'',
-    //     'weight':'',
-    //     'min_price':'',
-    //     'max_price':'',
-    // })
-    //loading.io for spinner
-    // const [state, setState] = useState({
-    //     'vegan': true,
-    //     'isolate': false
-    // })
-
-    useEffect(() => {
-        const split_data = window.localStorage.getItem('SCRAPE_DATA')
-        if (split_data != null){
-            setSplitData(JSON.parse(split_data))
-        }
-        
-    },[])
-
-    useEffect(() => {
-        window.localStorage.setItem('SCRAPE_DATA',JSON.stringify(splitData))
-    }, [splitData])
-
-    
-
-    // const handleToggle = ({ target }) =>
-    //     setState(s => ({ ...s, [target.name]: !s[target.name] }));
-
-    // const handleChange = (e) => {
-    //     setFormData((prev) => ({
-    //     ...prev,
-    //     [e.target.name]: e.target.value,
-    //     }));
-    //     console.log(`new form data: ${formData['supplement']}`)
-    // };
-    
+    const [searchKey, setSearchKey] = useState('')
     const SplitData = (data) => {
         const pages = Math.ceil(data.length / 12)
         // console.log(`pages: ${pages}`)
@@ -56,9 +16,58 @@ const Catalog = (props) => {
         }
         return split
     }
+        
+    const [sortSetting,setSortSettingg] = useState(null)
+    const [data, setData] = useState(()=>{
+        const storedData = localStorage.getItem('DB_DATA')
+        return storedData ? JSON.parse(storedData) : []
+    })
 
-    const data = props.data
-    setSplitData(SplitData(data))
+    const [splitData,setSplitData] = useState(() => {
+        return data ? SplitData(data) : []
+    })
+
+
+    const [searched, setSearched] = useState(()=>{
+        const search = localStorage.getItem('SEARCHED')
+        return search ? true : false
+    })
+
+    useEffect(() => {
+        const split_data = window.localStorage.getItem('DB_DATA')
+        if (split_data != null){
+            setSplitData(JSON.parse(split_data))
+        }
+        
+    },[])
+
+    useEffect(() => {
+        window.localStorage.setItem('DB_DATA',JSON.stringify(splitData))
+    }, [splitData])
+
+    
+
+    // const handleToggle = ({ target }) =>
+    //     setState(s => ({ ...s, [target.name]: !s[target.name] }));
+
+    const handleSearch = (e) => {
+        setSearchKey(e.target.value)
+        console.log(`new search key: ${searchKey}`)
+    }
+
+    const handleChange = (e) => {
+        setFormData((prev) => ({
+        ...prev,
+        [e.target.name]: e.target.value,
+        }));
+        console.log(`new form data: ${formData['supplement']}`)
+    };
+    
+    const SearchDB = () => {
+        console.log('pressed search button')
+    }
+    
+    
     
 
     const Next = () => {
@@ -71,43 +80,63 @@ const Catalog = (props) => {
     
 
     return(
-        <div className='w-full px-10 flex flex-col items-center justify-center'>
-        
-            <div className='flex flex-col items-center justify-center mx-auto w-2/3 mt-16'>
-                <h2 className='mb-4 text-sm text-gray-500 font-bold'>Products with '*' have more sizes</h2>
-                <div className='grid grid-cols-[repeat(auto-fit,minmax(380px,1fr))] gap-4 w-full place-items-center'>
-                    {splitData[page]?.map((item) => (               
-                        <Card supplement_name={item['name']} brand={item['brand']} sizes={item['sizes']} url={item['href']}/>                        
-                    ))}
+        <section className='flex flex-col items-center justify-center w-full px-10 mt-24 mb-5'>
+            <div className='mb-5 w-full mt-10 px-5 flex justify-end'>             
+                <div className='flex items-center'>
+                    <input className='max-w-xs border focus:outline-none border-gray-300 bg-gray-100 rounded-xl px-4 py-1 w-full text-black mr-2' type='text' placeholder='Search' onChange={handleSearch}/>
+                    <button onClick={()=>SearchDB}>
+                        <FaSearch size={20} />
+                    </button>
                 </div>
-                
-                {page === 0 && splitData.length>1 && (<div className='mt-16 flex items-center justify-center gap-4'>
-                    <button type='button' className=' cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
-                    </div>)}
-                {page === (splitData.length-1) && splitData.length>1 && page!=0 && (<div className='mt-16 flex items-center justify-center gap-4'>
-                    <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
-                    </div>)}
-                {page < (splitData.length-1) && page > 0 && (<div className='mt-16 flex items-center justify-center gap-4'>
-                    <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
-                    <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
-                    </div>)}
-
             </div>
 
-        </div>
+            <div className='flex flex-col mb-5 w-full mt-2 px-5'>
+                <h2 className='text-lg font-semibold mb-2'>Recent Searches</h2>
+                <ul className='flex gap-2 items-center'>
+                    <li className='border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100'>Protein</li>
+                    <li className='border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100'>Creatine</li>
+                    <li className='border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100'>BCAA</li>
+                </ul>
+            </div>
+
+            {
+                (loading && formSubmitted) ? (
+                    <img src='./spinner-200px-200px.svg' />
+                ) : (
+                    <div className='flex flex-col items-center justify-center mx-auto w-2/3 mt-16'>
+                        <h2 className='mb-4 text-sm text-gray-500 font-bold'>Products with '*' have more sizes</h2>
+                        <div className='mb-2 w-full mt-2 px-5'>
+                            <ul className='flex gap-2 items-center'>
+                                <li className='text-lg font-semibold'>Sort By</li>
+                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100 ${sortSetting === 'Size' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Size')}>Size</li>
+                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100 ${sortSetting === 'Price' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Price')}>Price</li>
+                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100 ${sortSetting === 'Value' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Value')}>Value</li>
+                            </ul>
+                        </div>
+                        <div className='grid grid-cols-[repeat(auto-fit,minmax(380px,1fr))] gap-4 w-full place-items-center'>
+                            {splitData[page]?.map((item) => (               
+                                <Card supplement_name={item['name']} brand={item['brand']} sizes={item['sizes']} url={item['href']}/>                        
+                            ))}
+                        </div>
+                        
+                        {page === 0 && splitData.length>1 && (<div className='mt-16 flex items-center justify-center gap-4'>
+                            <button type='button' className=' cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
+                            </div>)}
+                        {page === (splitData.length-1) && splitData.length>1 && page!=0 && (<div className='mt-16 flex items-center justify-center gap-4'>
+                            <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
+                            </div>)}
+                        {page < (splitData.length-1) && page > 0 && (<div className='mt-16 flex items-center justify-center gap-4'>
+                            <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
+                            <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
+                            </div>)}
+
+                    </div>
+                )
+            }
+        </section>
     )  
     
 }
 
-// const CatalogContainer = () => {
-//     const [formSubmitted, setFormSubmitted] = useState(false)
-//     return(
-//         <section className='w-full px-10 flex flex-col items-center justify-center'>
-//             {formSubmitted && <Catalog />}
-
-//         </section>
-
-//     )
-// }
 
 export default Catalog
