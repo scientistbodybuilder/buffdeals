@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Card from './Card'
+import Header from './Header'
 
 const Form = () => {
     const SplitData = (data) => {
@@ -274,4 +275,11 @@ const Form = () => {
     )
 }
 
-export default Form
+const FormContainer = () => (
+    <div className='flex items-center justify-center w-full'>
+        <Header />
+        <Form />
+    </div>
+)
+
+export default FormContainer

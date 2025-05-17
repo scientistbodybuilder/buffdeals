@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import Card from './Card'
+import Header from './Header';
 import { FaSearch } from "react-icons/fa";
 
 const Catalog = () => {
@@ -84,7 +85,7 @@ const Catalog = () => {
             <div className='mb-5 w-full mt-10 px-5 flex justify-end'>             
                 <div className='flex items-center'>
                     <input className='max-w-xs border focus:outline-none border-gray-300 bg-gray-100 rounded-xl px-4 py-1 w-full text-black mr-2' type='text' placeholder='Search' onChange={handleSearch}/>
-                    <button onClick={()=>SearchDB}>
+                    <button onClick={()=>SearchDB} className='cursor-pointer'>
                         <FaSearch size={20} />
                     </button>
                 </div>
@@ -138,5 +139,14 @@ const Catalog = () => {
     
 }
 
+const CatalogContainer = () => (
+    <div className='flex justify-center items-center w-full'>
+        <Header />
+        <Catalog />
+    </div>
+)
 
-export default Catalog
+
+
+
+export default CatalogContainer
