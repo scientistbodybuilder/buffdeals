@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from selenium import webdriver
 import re
+import supabase
 from flask_cors import CORS
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
@@ -314,6 +315,43 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
 @app.route('/')
 def main():
     return 'BuffDeals'
+
+@app.route('/login',methods=['POST'])
+async def login():
+    if request.method == 'POST':
+        print('logging in')
+
+        data = request.json()
+        email = data['email']
+        password = data['password']
+
+        try:
+            pass
+        except Exception as e:
+            print(f'Login: {e}')
+
+@app.route('/signup',methods=['POST'])
+async def signup():
+    if request.method == 'POST':
+        print('logging in')
+
+        data = request.json()
+        email = data['email']
+        password = data['password']
+
+        try:
+            data = await supabase.auth.sign_up({
+            'email': email,
+            'password': password,
+            'options': {
+                'email_redirect_to': 'https://localhost:5173',
+            },
+        })
+
+        except Exception as e:
+            print(f'Signup: {e}')
+
+
 
 @app.route('/get-supplement',methods=['POST'])
 def get_supplements():

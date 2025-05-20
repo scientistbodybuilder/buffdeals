@@ -243,13 +243,13 @@ const Form = () => {
                         <h2 className='mb-4 text-sm text-gray-500 font-bold'>Products with '*' have more sizes</h2>
                         <div className='mb-2 w-full mt-2 px-5'>
                             <ul className='flex gap-2 items-center'>
-                                <li className='text-lg font-semibold'>Sort By</li>
-                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100 ${sortSetting === 'Size' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Size')}>Size</li>
-                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100 ${sortSetting === 'Price' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Price')}>Price</li>
-                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 text-lg font-semibold hover:bg-gray-100 ${sortSetting === 'Value' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Value')}>Value</li>
+                                <li className='md:text-lg text-sm font-semibold'>Sort By</li>
+                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100 ${sortSetting === 'Size' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Size')}>Size</li>
+                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100 ${sortSetting === 'Price' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Price')}>Price</li>
+                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100 ${sortSetting === 'Value' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Value')}>Value</li>
                             </ul>
                         </div>
-                        <div className='grid grid-cols-[repeat(auto-fit,minmax(380px,1fr))] gap-4 w-full place-items-center'>
+                        <div className='grid md:grid-cols-[repeat(auto-fit,minmax(380px,1fr))] grid-cols-[repeat(auto-fit,minmax(320px,1fr))] md:gap-4 gap-1 w-full place-items-center'>
                             {splitData[page]?.map((item) => (               
                                 <Card supplement_name={item['name']} brand={item['brand']} sizes={item['sizes']} url={item['href']}/>                        
                             ))}
