@@ -10,7 +10,28 @@ const Signup = () => {
     const [flashMessage, setFlashMessage] = useState('')
     const Submit = () => {
         console.log('press signup')
-        
+        fetch('http://localhost:5000'+'/signup',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':'application/json'
+                    },
+                    body: JSON.stringify({
+                        'email':formData.email,
+                        'password':formData.password,                      
+                    })
+                }
+            ).then(res => {
+                    if (!res.ok) {
+                    throw new Error('Network response was not ok');
+                    }
+                    return res.json();
+                })
+                // .then(data => {
+                //     if(!data.success) {
+                //         setFlashMessage(data.flash)
+                //     }
+                // })
     }
 
     const handleChange = (e) => {
