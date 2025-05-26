@@ -1,7 +1,10 @@
 from flask import Flask, request, jsonify
 from selenium import webdriver
 import re
+# db
+from flask_sqlalchemy import SQLAlchemy
 import supabase
+# scrap
 from flask_cors import CORS
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
@@ -13,8 +16,15 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import StaleElementReferenceException, TimeoutException, NoSuchElementException, ElementNotInteractableException
 
+db = SQLAlchemy()
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173"], resources={r'/get-supplement': {'origins':'*'}})
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SUPABASE_URI")
+print(f'db uri: {os.getenv("SUPABASE_URI")}')
+db.init_app(app)
+
+CORS(app, origins=["http://localhost:5173"], resources={r'/get-supplement': {'origins':'*'},
+                                                        r'/signup': {'origins':'*'},
+                                                        r'/login': {'origins':'*'}})
 
 def num_products(products):
     count = 0
@@ -325,6 +335,9 @@ async def login():
         email = data['email']
         password = data['password']
 
+        print(f'email: {email}')
+        print(f'password: {password}')
+
         try:
             pass
         except Exception as e:
@@ -333,11 +346,13 @@ async def login():
 @app.route('/signup',methods=['POST'])
 async def signup():
     if request.method == 'POST':
-        print('logging in')
+        print('signing up')
 
         data = request.json()
         email = data['email']
         password = data['password']
+        print(f'email: {email}')
+        print(f'password: {password}')
 
         try:
             data = await supabase.auth.sign_up({
