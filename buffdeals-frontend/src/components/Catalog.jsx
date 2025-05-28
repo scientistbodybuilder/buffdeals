@@ -5,6 +5,7 @@ import Header from './Header';
 import { FaSearch } from "react-icons/fa";
 import { UserAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import supabase from '../supabaseClient';
 
 
 const Catalog = () => {
@@ -80,6 +81,8 @@ const Catalog = () => {
     
     const SearchDB = () => {
         console.log('pressed search button')
+
+        
     }
     
     

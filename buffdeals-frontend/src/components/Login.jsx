@@ -70,7 +70,7 @@ const Login = () => {
                 
                 <div className='mb-5 w-10/12'>
                     <label className='block text-xl mb-2' for='password'>Password</label>
-                    <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='password' name='password' type='text' required  onChange={handleChange}/>
+                    <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='password' name='password' type='password' required  onChange={handleChange}/>
                 </div>
 
                 <input className='mb-6 border border-gray-300 bg-[#49FCFC] text-center text-2xl text-[#3C3C3C] font-bold py-1 px-7 rounded-xl cursor-pointer shadow-md transition hover:opacity-80' type='submit' value='Login'/>

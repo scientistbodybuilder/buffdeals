@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import Card from './Card'
 import Header from './Header'
+import supabase from '../supabaseClient'
 
 const Form = () => {
+    const [flash,setFlash] = useState(false)
+    const [flashMessage, setFlashMessage] = useState('')
     const SplitData = (data) => {
         const pages = Math.ceil(data.length / 12)
         // console.log(`pages: ${pages}`)
@@ -85,12 +88,12 @@ const Form = () => {
         setPage(c=>c-1)
     }
 
-    const Submit = (e) => {
+    const Submit = async (e) => {
         e.preventDefault()
         setLoading(true)
         setFormSubmitted(true)
         
-        if (formData.min_price == '' | formData.max_price == '' | formData.min_price < formData.max_price ) {
+        if (formData.min_price == '' | formData.max_price == '' | parseFloat(formData.min_price) < parseFloat(formData.max_price) ) {
             console.log('request made')
             fetch('http://localhost:5000'+'/get-supplement',
                 {
@@ -126,9 +129,67 @@ const Form = () => {
 
         } else {
             console.log('problem with request')
+            setLoading(false)
+            setFlashMessage("Invalid Request")
+            setFlash(true)
+            setTimeout(()=>{
+                setFlash(false)
+            },5000)
+
         }
                         
     }
+
+    // const addToDB = async () => {
+    //     //Add collected data to the data base
+    //     const supabase_arr = data.map((item) => {
+    //         const a = {
+    //             name: item['name'],
+    //             url: item['href'],
+    //             size: item['sizes'][0]['size'],
+    //             price: item['sizes'][0]['price'],
+    //             brand: item['brand'],
+    //             multiple_size: item['sizes'].length > 1 ? true : false,
+    //             key: item['brand'] + '-' + item['name']
+    //         }
+    //     })
+    //     console.log(`supabase_arr: ${supabase_arr}`)
+    //     // const { error } = await supabase
+    //     // .from("scrapedata")
+    //     // .upsert(supabase_arr, { onConflict: ['key'] })
+    //     // if(error) {
+    //     //    console.log(`Error adding scrape data to df: ${error}`) 
+    //     // } else {
+    //     //     console.log('success in adding scrape data to db')
+    //     // }
+    // }
+    useEffect(() => {
+        const addToDB = async () => {
+        //Add collected data to the data base
+        const supabase_arr = data.map((item) => {
+            return {
+                name: item['name'],
+                url: item['href'],
+                size: item['sizes'][0]['size'],
+                price: item['sizes'][0]['price'],
+                brand: item['brand'],
+                multiple_size: item['sizes'].length > 1 ? true : false,
+                key: item['brand'] + '-' + item['name']
+            }
+        })
+        console.log(`supabase_arr: ${supabase_arr}`)
+        // const { error } = await supabase
+        // .from("scrapedata")
+        // .upsert(supabase_arr, { onConflict: ['key'] })
+        // if(error) {
+        //    console.log(`Error adding scrape data to df: ${error}`) 
+        // } else {
+        //     console.log('success in adding scrape data to db')
+        // }
+    }
+    addToDB()
+
+    },[data])
 
     function comparePrice(a, b) {
         const pricea = a['sizes'][0]['price']
@@ -228,6 +289,12 @@ const Form = () => {
                     
 
                     <input className='border border-gray-300 bg-[#49FCFC] text-center text-3xl text-[#3C3C3C] font-bold py-1 px-7 rounded-xl cursor-pointer shadow-md transition hover:opacity-80' type='submit' value='Search'/>
+
+                    {flash && (
+                    <p className=' mt-3 font-medium text-[red] text-base'>
+                        {flashMessage}
+                    </p>
+                )}
                 </form>
 
                 <div>
