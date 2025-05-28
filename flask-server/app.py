@@ -326,6 +326,7 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
 def main():
     return 'BuffDeals'
 
+<<<<<<< HEAD
 @app.route('/login',methods=['POST'])
 async def login():
     if request.method == 'POST':
@@ -367,6 +368,8 @@ async def signup():
             print(f'Signup: {e}')
 
 
+=======
+>>>>>>> 67dfdb34e723060bc284a1c5c3e94dc6151c9171
 
 @app.route('/get-supplement',methods=['POST'])
 def get_supplements():
