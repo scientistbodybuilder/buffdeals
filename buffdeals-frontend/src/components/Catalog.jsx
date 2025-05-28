@@ -3,8 +3,16 @@ import Card from './Card'
 import { Autocomplete } from '@mantine/core';
 import Header from './Header';
 import { FaSearch } from "react-icons/fa";
+import { UserAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+
 
 const Catalog = () => {
+    const { session } = UserAuth()
+    console.log(session)
+    const navigate = useNavigate()
+    const [email, setEmail] = useState('')
+
     const [loading, setLoading] = useState(false)
     const [page,setPage] = useState(0)
     const [searchKey, setSearchKey] = useState('')
@@ -46,6 +54,11 @@ const Catalog = () => {
     useEffect(() => {
         window.localStorage.setItem('DB_DATA',JSON.stringify(splitData))
     }, [splitData])
+
+    useEffect(()=>{
+        const session_email = session?.user?.email
+        setEmail(session_email)
+    },[])
 
     
 

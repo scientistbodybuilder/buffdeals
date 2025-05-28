@@ -1,26 +1,30 @@
-import React from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import supabase from "./supabaseClient";
 import { MantineProvider } from '@mantine/core';
-import Header from './components/Header'
 import Form from './components/Form'
 import Catalog from './components/Catalog'
 import Login from './components/Login'
 import Signup from './components/Signup'
+import PrivateRoute from "./components/PrivateRoute";
+import { AuthContextProvider } from "./context/AuthContext";
 
 
-export default function App(){
+export default function App(){ 
   return(
     <MantineProvider>
-      <Router>
+      <AuthContextProvider>
+        <Router>
           <div className="flex flex-col items-center justify-center">
             <Routes>
               <Route path="/login" element={<Login />}></Route>
               <Route path="/signup" element={<Signup />}></Route>
               <Route path="/" element={<Form />} />
-              <Route path="/catalog" element={<Catalog />} />
+              <Route path="/dashboard" element={ <PrivateRoute> <Catalog /> </PrivateRoute>} />
             </Routes>
           </div>
-      </Router>
+        </Router>
+      </AuthContextProvider>
     </MantineProvider> 
   )
 }
