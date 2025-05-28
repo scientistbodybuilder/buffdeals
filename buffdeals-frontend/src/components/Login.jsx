@@ -1,16 +1,49 @@
 import React, {useState, useEffect} from 'react'
 import { HashLink as Link } from 'react-router-hash-link'
+import { useNavigate } from 'react-router-dom';
+import { UserAuth } from '../context/AuthContext';
 
 
 const Login = () => {
+    const navigate = useNavigate()
+    const { session, signIn } = UserAuth()
+    console.log(session)
     const [formData, setFormData] = useState({
             'email':'',
             'password':'',
         })
     const [flash,setFlash] = useState(false)
     const [flashMessage, setFlashMessage] = useState('')
-    const Submit = () => {
-        console.log('press login')
+
+    const Submit = async (e) => {
+        e.preventDefault()
+        try {
+            const response = await signIn(formData['email'],formData['password'])
+            if (response.success){
+                console.log('sign in success')
+                navigate('/dashboard')
+            } else if (response.existingAcc){
+                setFlashMessage("Incorrect password")
+                setFlash(true)
+                setTimeout(()=>{
+                    setFlash(false)
+                },5000)
+            } else {
+                setFlashMessage("Invalid Credentials")
+                setFlash(true)
+                setTimeout(()=>{
+                    setFlash(false)
+                },5000)
+            }
+
+        } catch(e) {
+            console.log(`Sign in error: ${e}`)
+            setFlashMessage("Invalid Credentials")
+            setFlash(true)
+            setTimeout(()=>{
+                setFlash(false)
+            },5000)
+        }
         
     }
 
@@ -31,13 +64,13 @@ const Login = () => {
 
 
                 <div className='mb-5 w-10/12'>
-                    <label className='block text-xl mb-2' for='min_price'>Email</label>
-                    <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='supplement' name='supplement' type='text' required onChange={handleChange}/>
+                    <label className='block text-xl mb-2' for='email'>Email</label>
+                    <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='email' name='email' type='text' required onChange={handleChange}/>
                 </div>
                 
                 <div className='mb-5 w-10/12'>
-                    <label className='block text-xl mb-2' for='min_price'>Password</label>
-                    <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='supplement' name='supplement' type='text' required  onChange={handleChange}/>
+                    <label className='block text-xl mb-2' for='password'>Password</label>
+                    <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='password' name='password' type='text' required  onChange={handleChange}/>
                 </div>
 
                 <input className='mb-6 border border-gray-300 bg-[#49FCFC] text-center text-2xl text-[#3C3C3C] font-bold py-1 px-7 rounded-xl cursor-pointer shadow-md transition hover:opacity-80' type='submit' value='Login'/>
@@ -47,7 +80,7 @@ const Login = () => {
                 <p className='mb-10'><Link to="/" className='cursor-pointer'>Back to search</Link></p>
 
                 {flash && (
-                    <p className=''>
+                    <p className='mb-6 font-medium text-[red] text-sm'>
                         {flashMessage}
                     </p>
                 )}

@@ -1,25 +1,60 @@
 import React, {useState, useEffect} from 'react'
 import { HashLink as Link } from 'react-router-hash-link'
+import { Form, useNavigate } from 'react-router-dom';
+import { UserAuth } from '../context/AuthContext';
+
 
 const Signup = () => {
+    const navigate = useNavigate()
+    const { session, signUp } = UserAuth()
     const [formData, setFormData] = useState({
                 'email':'',
                 'password':'',
             })
     const [flash,setFlash] = useState(false)
     const [flashMessage, setFlashMessage] = useState('')
-    const Submit = () => {
+    
+    const Submit = async (e) => {
+        e.preventDefault()  
         console.log('press signup')
-        
-    }
+        try {   
+            const result = await signUp(formData['email'].toLowerCase(),formData['password'])
+            if (result.success) {
+                //move to login
+                console.log('sign up success')
+                navigate('/login')
+            } else if (result.existingEmail) {
+                //flash
+                setFlashMessage("There is an existing account with this email")
+                setFlash(true)
+                setTimeout(()=>{
+                    setFlash(false)
+                },5000)
+            } else {
+                setFlashMessage("Authentication Error")
+                setFlash(true)
+                setTimeout(()=>{
+                    setFlash(false)
+                },5000)
+            }
+        } catch(e) {
+            console.log('Auth Error')
+            setFlashMessage("Authentication Error")
+            setFlash(true)
+            setTimeout(()=>{
+                setFlash(false)
+            },5000)
+        }
+            
+    } 
 
     const handleChange = (e) => {
         setFormData((prev) => ({
         ...prev,
         [e.target.name]: e.target.value,
         }));
-        console.log(`new form data: ${formData['email']}`)
     };
+
     return(
         <section className='flex flex-col items-center justify-center w-full px-10 mb-5 h-screen '>
             <form className='mx-auto w-100 flex flex-col justify-center items-center border border-gray-300 rounded-md bg-[#fff]' onSubmit={Submit}>
@@ -29,13 +64,13 @@ const Signup = () => {
 
 
                 <div className='mb-5 w-10/12'>
-                    <label className='block text-xl mb-2' for='min_price'>Email</label>
-                    <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='supplement' name='supplement' type='text' required onChange={handleChange}/>
+                    <label className='block text-xl mb-2' for='email'>Email</label>
+                    <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='email' name='email' type='text' required onChange={handleChange}/>
                 </div>
                 
                 <div className='mb-5 w-10/12'>
-                    <label className='block text-xl mb-2' for='min_price'>Password</label>
-                    <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='supplement' name='supplement' type='text' required onChange={handleChange}/>
+                    <label className='block text-xl mb-2' for='password'>Password</label>
+                    <input className='border focus:outline-none border-gray-300 bg-gray-100 rounded-lg p-2 w-full text-black' id='password' name='password' type='text' required onChange={handleChange}/>
                 </div>
 
                 <input className='mb-6 border border-gray-300 bg-[#49FCFC] text-center text-2xl text-[#3C3C3C] font-bold py-1 px-7 rounded-xl cursor-pointer shadow-md transition hover:opacity-80' type='submit' value='Sign up'/>
@@ -45,7 +80,7 @@ const Signup = () => {
                 <p className='mb-10'><Link to="/" className='cursor-pointer'>Back to search</Link></p>
 
                 {flash && (
-                    <p className='mb-10'>
+                    <p className='mb-6 text-sm font-medium text-[red]'>
                         {flashMessage}
                     </p>
                 )}

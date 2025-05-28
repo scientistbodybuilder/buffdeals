@@ -1,9 +1,18 @@
 import React, {useState, useEffect} from 'react'
 import Card from './Card'
+import { Autocomplete } from '@mantine/core';
 import Header from './Header';
 import { FaSearch } from "react-icons/fa";
+import { UserAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+
 
 const Catalog = () => {
+    const { session } = UserAuth()
+    console.log(session)
+    const navigate = useNavigate()
+    const [email, setEmail] = useState('')
+
     const [loading, setLoading] = useState(false)
     const [page,setPage] = useState(0)
     const [searchKey, setSearchKey] = useState('')
@@ -46,6 +55,11 @@ const Catalog = () => {
         window.localStorage.setItem('DB_DATA',JSON.stringify(splitData))
     }, [splitData])
 
+    useEffect(()=>{
+        const session_email = session?.user?.email
+        setEmail(session_email)
+    },[])
+
     
 
     // const handleToggle = ({ target }) =>
@@ -82,9 +96,23 @@ const Catalog = () => {
 
     return(
         <section className='flex flex-col items-center justify-center w-full px-10 mt-24 mb-5'>
-            <div className='mb-5 w-full mt-10 px-5 flex justify-end'>             
-                <div className='flex items-center'>
-                    <input className='max-w-xs border focus:outline-none border-gray-300 bg-gray-100 rounded-xl px-4 py-1 w-full text-black mr-2' type='text' placeholder='Search' onChange={handleSearch}/>
+            <div className='mb-25 w-full mt-10 px-5 flex justify-center'>             
+                <div className='flex items-center w-full justify-center'>
+                    <div className='max-w-xl border focus:outline-none border-gray-300 bg-gray-100 rounded-xl px-4 py-2 w-full text-black mr-3'>
+                        <Autocomplete 
+                        placeholder='Search'
+                        data={[
+                            'creatine',
+                            'creatine monohydrate',
+                            'isolate',
+                            'protein',
+                            'whey',
+                            'whey isolate',
+                            'whey protein',
+                            'vegan protein',
+
+                        ]}/>
+                    </div>
                     <button onClick={()=>SearchDB} className='cursor-pointer'>
                         <FaSearch size={20} />
                     </button>
