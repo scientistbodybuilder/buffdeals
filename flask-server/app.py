@@ -326,50 +326,6 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
 def main():
     return 'BuffDeals'
 
-<<<<<<< HEAD
-@app.route('/login',methods=['POST'])
-async def login():
-    if request.method == 'POST':
-        print('logging in')
-
-        data = request.json()
-        email = data['email']
-        password = data['password']
-
-        print(f'email: {email}')
-        print(f'password: {password}')
-
-        try:
-            pass
-        except Exception as e:
-            print(f'Login: {e}')
-
-@app.route('/signup',methods=['POST'])
-async def signup():
-    if request.method == 'POST':
-        print('signing up')
-
-        data = request.json()
-        email = data['email']
-        password = data['password']
-        print(f'email: {email}')
-        print(f'password: {password}')
-
-        try:
-            data = await supabase.auth.sign_up({
-            'email': email,
-            'password': password,
-            'options': {
-                'email_redirect_to': 'https://localhost:5173',
-            },
-        })
-
-        except Exception as e:
-            print(f'Signup: {e}')
-
-
-=======
->>>>>>> 67dfdb34e723060bc284a1c5c3e94dc6151c9171
 
 @app.route('/get-supplement',methods=['POST'])
 def get_supplements():
