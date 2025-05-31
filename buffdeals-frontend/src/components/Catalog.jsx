@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import Card from './Card'
-import { Autocomplete } from '@mantine/core';
+import { Autocomplete, ModalTitle } from '@mantine/core';
 import Header from './Header';
 import { FaSearch } from "react-icons/fa";
 import { UserAuth } from '../context/AuthContext';
@@ -10,7 +10,7 @@ import supabase from '../supabaseClient';
 
 const Catalog = () => {
     const { session } = UserAuth()
-    console.log(session)
+    // console.log(session)
     const navigate = useNavigate()
     const [email, setEmail] = useState('')
 
@@ -71,17 +71,38 @@ const Catalog = () => {
         console.log(`new search key: ${searchKey}`)
     }
 
-    const handleChange = (e) => {
-        setFormData((prev) => ({
-        ...prev,
-        [e.target.name]: e.target.value,
-        }));
-        console.log(`new form data: ${formData['supplement']}`)
-    };
     
-    const SearchDB = () => {
-        console.log('pressed search button')
+    
+    const SearchDB = async () => {
+        console.log(`Searching: ${searchKey}`)
+        const searchTerms = searchKey.toLowerCase().split(" ")
 
+        const orFilters = searchTerms
+            .map(term => `name.ilike.%${term}%`)
+            .join(',');
+
+        const { result, error } = await supabase.from("scraped_data")
+        .select()
+        .or(orFilters)
+        if (error){
+            console.error('Error in searching db', error)
+        } else if (result) {
+            console.log('DB search successful')
+            console.log(`There are ${result.length} results\n`)
+            for (let i=0; i< result.length; i++) {
+                console.log(`name: ${result[i].name}`)
+                console.log(`url: ${result[i].url}`)
+                console.log(`size: ${result[i].size}`)
+                console.log(`price: ${result[i].price}`)
+                console.log(`brand: ${result[i].brand}`)
+                console.log(`multiple_sizes: ${result[i].multiple_sizes}`)
+                console.log(`key6: ${result[i].key}\n`)
+            }
+        } else {
+            console.log('Db query successful, but no data')
+        }
+
+        
         
     }
     
@@ -101,7 +122,7 @@ const Catalog = () => {
         <section className='flex flex-col items-center justify-center w-full px-10 mt-24 mb-5'>
             <div className='mb-25 w-full mt-10 px-5 flex justify-center'>             
                 <div className='flex items-center w-full justify-center'>
-                    <div className='max-w-xl border focus:outline-none border-gray-300 bg-gray-100 rounded-xl px-4 py-2 w-full text-black mr-3'>
+                    {/* <div className='max-w-xl border focus:outline-none border-gray-300 bg-gray-100 rounded-xl px-4 py-2 w-full text-black mr-3'>
                         <Autocomplete 
                         placeholder='Search'
                         data={[
@@ -115,8 +136,9 @@ const Catalog = () => {
                             'vegan protein',
 
                         ]}/>
-                    </div>
-                    <button onClick={()=>SearchDB} className='cursor-pointer'>
+                    </div> */}
+                    <input className='max-w-xl border focus:outline-none border-gray-300 bg-gray-100 rounded-xl px-4 py-2 w-full text-black mr-3' type='text' placeholder='Search' onChange={handleSearch}/>
+                    <button onClick={SearchDB} className='cursor-pointer'>
                         <FaSearch size={20} />
                     </button>
                 </div>

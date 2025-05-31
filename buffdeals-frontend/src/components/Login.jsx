@@ -7,7 +7,7 @@ import { UserAuth } from '../context/AuthContext';
 const Login = () => {
     const navigate = useNavigate()
     const { session, signIn } = UserAuth()
-    console.log(session)
+    // console.log(session)
     const [formData, setFormData] = useState({
             'email':'',
             'password':'',

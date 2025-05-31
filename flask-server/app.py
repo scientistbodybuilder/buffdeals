@@ -35,7 +35,7 @@ def extract_num(text):
 
 def scrape(supplement,weight,max_price,min_price,vegan,isolate):
     search_supplement = supplement.strip().split()
-    pattern = r'.*'.join(search_supplement)
+    pattern = r'.*' + r'.*'.join(search_supplement) + r'.*'
     print(f'search pattern: {pattern}')
 
     service = Service(ChromeDriverManager().install())
@@ -68,8 +68,9 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
         pass
 
     container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//ul[@id='product-blocks']/li")))
-    print(f'There are {len(container)} products')
-    for i in range(len(container)):
+    len_container = len(container)
+    print(f'There are {len_container} products')
+    for i in range(len_container):
         container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//ul[@id='product-blocks']/li")))
         # get the product name and url to it's page
         try:
@@ -82,7 +83,7 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
             product_title = container[i].find_element(By.XPATH, ".//a/div/h2/span").text
 
         
-        
+        print('checking if product name matches')
         if re.search(rf'{pattern}',product_title.lower()) and (not vegan or (vegan and product_title.lower().find('vegan') != -1)) and (not isolate or (isolate and product_title.lower().find('isolate') != -1)):
             driver.get(product_href)
             print(f'title: {product_title}')
@@ -94,12 +95,13 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
             except Exception as e:
                 sizes = None
             if sizes:
-                print(f'There are {len(sizes)} sizes')
+                len_sizes = len(sizes)
+                print(f'There are {len_sizes} sizes')
                 # add logic to check whether there is more than one size. If there is more than one flavour, always click chocolate click, so that all sizes are available
                 product_sizes = []
                 
 
-                for i in range(len(sizes)):
+                for i in range(len_sizes):
                     # click that size
                     try:
                         size_btn = WebDriverWait(driver,timeout).until(EC.element_to_be_clickable((By.XPATH, f"(//ul[@class='flex items-center variable-items']/li)[{i+1}]")))
@@ -119,7 +121,6 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
                         print(e)
                         errors+=1
                         continue
-                    
                     # there is variation price (regular price), and sometimes variation sale price, which is discounted. check whether discounted price exists, if it does take
                     # that instead
                     try:
@@ -193,7 +194,7 @@ def scrape(supplement,weight,max_price,min_price,vegan,isolate):
         except TimeoutException as e:
             print('Page has no products')
             break
-
+        
         for i in range(len(container)):
             container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//div[@class='hdt-shop-content']/hdt-reval-items/hdt-card-product")))
             

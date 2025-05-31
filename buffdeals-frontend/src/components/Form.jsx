@@ -140,52 +140,31 @@ const Form = () => {
                         
     }
 
-    // const addToDB = async () => {
-    //     //Add collected data to the data base
-    //     const supabase_arr = data.map((item) => {
-    //         const a = {
-    //             name: item['name'],
-    //             url: item['href'],
-    //             size: item['sizes'][0]['size'],
-    //             price: item['sizes'][0]['price'],
-    //             brand: item['brand'],
-    //             multiple_size: item['sizes'].length > 1 ? true : false,
-    //             key: item['brand'] + '-' + item['name']
-    //         }
-    //     })
-    //     console.log(`supabase_arr: ${supabase_arr}`)
-    //     // const { error } = await supabase
-    //     // .from("scrapedata")
-    //     // .upsert(supabase_arr, { onConflict: ['key'] })
-    //     // if(error) {
-    //     //    console.log(`Error adding scrape data to df: ${error}`) 
-    //     // } else {
-    //     //     console.log('success in adding scrape data to db')
-    //     // }
-    // }
+    
     useEffect(() => {
         const addToDB = async () => {
         //Add collected data to the data base
         const supabase_arr = data.map((item) => {
             return {
-                name: item['name'],
+                name: item['name'].toLowerCase(),
                 url: item['href'],
                 size: item['sizes'][0]['size'],
                 price: item['sizes'][0]['price'],
-                brand: item['brand'],
-                multiple_size: item['sizes'].length > 1 ? true : false,
-                key: item['brand'] + '-' + item['name']
+                brand: item['brand'].toLowerCase(),
+                multiple_sizes: item['sizes'].length > 1 ? true : false,
+                key: item['brand'].toLowerCase() + '-' + item['name'].toLowerCase()
             }
         })
-        console.log(`supabase_arr: ${supabase_arr}`)
-        // const { error } = await supabase
-        // .from("scrapedata")
-        // .upsert(supabase_arr, { onConflict: ['key'] })
-        // if(error) {
-        //    console.log(`Error adding scrape data to df: ${error}`) 
-        // } else {
-        //     console.log('success in adding scrape data to db')
-        // }
+        
+        
+        const { error } = await supabase
+        .from("scraped_data")
+        .upsert(supabase_arr, { onConflict: ['key'] })
+        if(error) {
+           console.log(`Error adding scrape data to df: ${error}`) 
+        } else {
+            console.log('success in adding scrape data to db')
+        }
     }
     addToDB()
 
