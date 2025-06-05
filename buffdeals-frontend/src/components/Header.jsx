@@ -23,7 +23,7 @@ const Header = () => {
     }
 
     return(
-        <nav className='w-full px-10 mx-auto bg-[#49FCFC] h-24 flex left-0 top-0 right-0 z-100 fixed items-center justify-between'>
+        <nav className='w-full px-10 mx-auto bg-[#49FCFC] h-20 flex left-0 top-0 right-0 z-100 fixed items-center justify-between'>
             <h2 className='md:text-4xl lg:text-5xl text-2xl text-black font-sans font-bold'>BUFF DEALS</h2>
             <ul className='items-center flex justify-evenly gap-5'>
                 <li className={`md:text-2xl font-medium cursor-pointer text-base ${selected === 'Search' ? '' : ''}`}>

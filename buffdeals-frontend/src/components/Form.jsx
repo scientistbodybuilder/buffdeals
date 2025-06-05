@@ -149,10 +149,8 @@ const Form = () => {
                 name: item['name'],
                 trunc_name: item['trunc_name'],
                 url: item['href'],
-                size: item['sizes'] ? item['sizes'][0]['size'] : '',
-                price: item['sizes'] ? item['sizes'][0]['price'] : '',
+                sizes: item['sizes'],
                 brand: item['brand'],
-                multiple_sizes: item['sizes'].length > 1 ? true : false,
                 key: item['brand'].toLowerCase() + '-' + item['name'].toLowerCase()
             }
         })
@@ -304,7 +302,7 @@ const Form = () => {
                         </div>
                         <div className='grid md:grid-cols-[repeat(auto-fit,minmax(380px,1fr))] grid-cols-[repeat(auto-fit,minmax(320px,1fr))] md:gap-4 gap-1 w-full place-items-center'>
                             {splitData[page]?.map((item) => (               
-                                <Card supplement_name={item['trunc_name']} brand={item['brand']} sizes={item['sizes']} url={item['href']}/>                        
+                                <Card supplement_name={item['trunc_name']} brand={item['brand']} sizes={item['sizes']} url={item['url']}/>                        
                             ))}
                         </div>
                         

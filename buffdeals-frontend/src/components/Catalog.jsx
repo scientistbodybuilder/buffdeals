@@ -44,17 +44,32 @@ const Catalog = () => {
         return search ? true : false
     })
 
-    useEffect(() => {
-        const split_data = window.localStorage.getItem('DB_DATA')
-        if (split_data != null){
-            setSplitData(JSON.parse(split_data))
-        }
-        
-    },[])
+    const [searchHistory, setSearchHistory] = useState(()=>{
+        const search_history = localStorage.getItem('SEARCH_HISTORY')
+        return search_history ? JSON.parse(search_history) : []
+    })
 
     useEffect(() => {
-        window.localStorage.setItem('DB_DATA',JSON.stringify(splitData))
-    }, [splitData])
+            const db = window.localStorage.getItem('DB_DATA')
+            if (db != null){
+                const parsed = JSON.parse(db)
+                setData(parsed)
+                setSplitData(SplitData(parsed))
+            }
+            
+        },[])
+
+    useEffect(() => {
+        window.localStorage.setItem('DB_DATA',JSON.stringify(db_data))
+    }, [db_data])
+
+    useEffect(() => {
+            window.localStorage.setItem('SEARCHED', searched)
+    }, [searched])
+
+    useEffect(() => {
+            window.localStorage.setItem('SEARCH_HISTORY', JSON.stringify(searchHistory))
+    }, [searchHistory])
 
     useEffect(()=>{
         const session_email = session?.user?.email
@@ -68,41 +83,141 @@ const Catalog = () => {
 
     const handleSearch = (e) => {
         setSearchKey(e.target.value)
-        console.log(`new search key: ${searchKey}`)
+        console.log(searchKey)
+    }
+
+    const updateSearches = async () => {
+        const { data, error } = await supabase.from("users")
+        .select("recent_searches")
+        .eq('email', email)
+        if (error) {
+
+        } else {
+            console.log('search history', data[0]['recent_searches'])
+            let new_list
+            if (data[0]['recent_searches'] && data[0]['recent_searches'].length > 2) {
+                console.log('Existing search history of over 2 searches')
+                data[0]['recent_searches'].push(searchKey)
+                new_list = data[0]['recent_searches'].slice(1) 
+            } else if (data[0]['recent_searches']) {
+                console.log('Existing search history of under 3 searches')
+                data[0]['recent_searches'].push(searchKey)
+                new_list = data[0]['recent_searches']
+            } else {
+                console.log('No search history')
+                new_list = [searchKey]
+            }
+
+            console.log(`search list: ${new_list}`)
+            const { error } = await supabase.from("users")
+            .update({recent_searches: new_list})
+            .eq("email", email)
+            if (error) {
+                console.error('Error updating search history', error)
+            } else {
+                console.log('Search history updated')
+                //update it on the ui
+                setSearchHistory(new_list)
+            }
+        }
     }
 
     
     
-    const SearchDB = async () => {
-        console.log(`Searching: ${searchKey}`)
-        const searchTerms = searchKey.toLowerCase().split(" ")
+    const SearchDB = async (search_term) => {
+        setLoading(true)
+        setSearched(true)
+        try {
+            console.log(`${email} is searching:`, search_term)
+            // const searchTerms = searchKey.toLowerCase().split(" ")
 
-        
-        const { data, error } = await supabase.from("scraped_data")
-        .select("*")
-        .ilike('name', `%${searchKey.toLowerCase().trim()}%`)
+            
+            const { data, error } = await supabase.from("scraped_data")
+            .select("*")
+            .ilike('name', `%${search_term.toLowerCase().trim()}%`)
 
-        console.log(`result: ${data}`)
-        if (error){
-            console.error('Error in searching db', error)
-        } else if (data) {
-            console.log('DB search successful')
-            console.log(`There are ${data.length} results\n`)
-            for (let i=0; i< data.length; i++) {
-                console.log(`name: ${data[i].name}`)
-                console.log(`url: ${data[i].url}`)
-                console.log(`size: ${data[i].size}`)
-                console.log(`price: ${data[i].price}`)
-                console.log(`brand: ${data[i].brand}`)
-                console.log(`multiple_sizes: ${data[i].multiple_sizes}`)
-                console.log(`key6: ${data[i].key}\n`)
+            if (error){
+                console.error('Error in searching db', error)
+            } else if (data) {
+                console.log('DB search successful')
+                console.log(`There are ${data.length} results\n`)
+                
+                setData(data)
+                setSplitData(SplitData(data))
+
+                //Update the most recent searches
+                await updateSearches()
+                
+            } else {
+                console.log('Db query successful, but no data')
             }
-        } else {
-            console.log('Db query successful, but no data')
-        }
+            setLoading(false)
+        } catch (e) {
+            console.error('Error', e)
+            setLoading(false)
+        }    
+    }
 
-        
-        
+
+
+    
+
+
+    function comparePrice(a, b) {
+        const pricea = a['sizes'][0]['price']
+        const priceb = b['sizes'][0]['price']
+        if (pricea < priceb) {
+            return -1;
+        } else if (pricea > priceb) {
+            return 1;
+        }
+        // a must be equal to b
+        return 0;
+    }
+    
+    function compareSize(a, b) {
+        const pricea = a['sizes'][0]['size']
+        const priceb = b['sizes'][0]['size']
+        if (pricea < priceb) {
+            return -1;
+        } else if (pricea > priceb) {
+            return 1;
+        }
+        // a must be equal to b
+        return 0;
+    }
+
+    function compareValue(a, b) {
+        const pricea = a['sizes'][0]['value']
+        const priceb = b['sizes'][0]['value']
+        if (pricea < priceb) {
+            return -1;
+        } else if (pricea > priceb) {
+            return 1;
+        }
+        // a must be equal to b
+        return 0;
+    }
+    
+
+
+    const Sort = (by) => {
+        if (by=='Price' && db_data.length > 0){
+            setSortSettingg('Price')
+            const sorted = db_data.sort(comparePrice)
+            setData(sorted)
+            setSplitData(SplitData(db_data))
+        } else if (by=='Size' && db_data.length > 0){
+            setSortSettingg('Size')
+            const sorted = db_data.sort(compareSize)
+            setData(sorted)
+            setSplitData(SplitData(db_data))
+        } else if (by=='Value' && db_data.length > 0) {
+            setSortSettingg('Value')
+            const sorted = db_data.sort(compareValue)
+            setData(sorted)
+            setSplitData(SplitData(db_data))
+        }
     }
     
     
@@ -119,7 +234,7 @@ const Catalog = () => {
 
     return(
         <section className='flex flex-col items-center justify-center w-full px-10 mt-24 mb-5'>
-            <div className='mb-25 w-full mt-10 px-5 flex justify-center'>             
+            <div className='mb-15 w-full mt-10 px-5 flex justify-center'>             
                 <div className='flex items-center w-full justify-center'>
                     {/* <div className='max-w-xl border focus:outline-none border-gray-300 bg-gray-100 rounded-xl px-4 py-2 w-full text-black mr-3'>
                         <Autocomplete 
@@ -137,7 +252,7 @@ const Catalog = () => {
                         ]}/>
                     </div> */}
                     <input className='max-w-xl border focus:outline-none border-gray-300 bg-gray-100 rounded-xl px-4 py-2 w-full text-black mr-3' type='text' placeholder='Search' onChange={handleSearch}/>
-                    <button onClick={SearchDB} className='cursor-pointer'>
+                    <button onClick={() => SearchDB(searchKey)} className='cursor-pointer'>
                         <FaSearch size={20} />
                     </button>
                 </div>
@@ -146,17 +261,19 @@ const Catalog = () => {
             <div className='flex flex-col mb-5 w-full mt-2 px-5'>
                 <h2 className='md:text-lg text-sm font-semibold mb-2'>Recent Searches</h2>
                 <ul className='flex gap-2 items-center'>
-                    <li className='border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100'>Protein</li>
-                    <li className='border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100'>Creatine</li>
-                    <li className='border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100'>BCAA</li>
+                    {
+                        searchHistory?.map((item) => (
+                            <li className='border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100' onClick={() => SearchDB(item)}>{item}</li>
+                        ))
+                    }
                 </ul>
             </div>
 
             {
-                (loading && formSubmitted) ? (
+                (loading && searched) ? (
                     <img src='./spinner-200px-200px.svg' />
                 ) : (
-                    <div className='flex flex-col items-center justify-center mx-auto w-2/3 mt-16'>
+                    <div className='flex flex-col items-center justify-center mx-auto w-2/3 mt-10'>
                         <h2 className='mb-4 text-sm text-gray-500 font-bold'>Products with '*' have more sizes</h2>
                         <div className='mb-2 w-full mt-2 px-5'>
                             <ul className='flex gap-2 items-center'>
@@ -168,7 +285,7 @@ const Catalog = () => {
                         </div>
                         <div className='grid grid-cols-[repeat(auto-fit,minmax(380px,1fr))] gap-4 w-full place-items-center'>
                             {splitData[page]?.map((item) => (               
-                                <Card supplement_name={item['trunc_name']} brand={item['brand']} sizes={item['sizes']} url={item['href']}/>                        
+                                <Card supplement_name={item['trunc_name']} brand={item['brand']} sizes={item['sizes']} url={item['url']}/>                        
                             ))}
                         </div>
                         
