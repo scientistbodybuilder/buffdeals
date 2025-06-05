@@ -18,6 +18,7 @@ export const AuthContextProvider = ({children}) => {
                     if (data[i].email === email) {
                         //existing email
                         existingEmail = existingEmail + 1
+                        break
                     }
                 }
                 if (existingEmail > 0) {

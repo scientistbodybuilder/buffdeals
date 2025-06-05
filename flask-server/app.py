@@ -418,9 +418,11 @@ def get_supplements():
             if len(name) >= trunc_len:
                 trunc = name[:trunc_len]
                 new_name = trunc.strip() + '...'
-                results[i]['name'] = new_name
+                results[i]['trunc_name'] = new_name
+            else:
+                results[i]['trunc_name'] = name
 
-            
+        print(results)    
         response = jsonify(results)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response

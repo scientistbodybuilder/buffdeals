@@ -146,27 +146,34 @@ const Form = () => {
         //Add collected data to the data base
         const supabase_arr = data.map((item) => {
             return {
-                name: item['name'].toLowerCase(),
+                name: item['name'],
+                trunc_name: item['trunc_name'],
                 url: item['href'],
-                size: item['sizes'][0]['size'],
-                price: item['sizes'][0]['price'],
-                brand: item['brand'].toLowerCase(),
+                size: item['sizes'] ? item['sizes'][0]['size'] : '',
+                price: item['sizes'] ? item['sizes'][0]['price'] : '',
+                brand: item['brand'],
                 multiple_sizes: item['sizes'].length > 1 ? true : false,
                 key: item['brand'].toLowerCase() + '-' + item['name'].toLowerCase()
             }
         })
+
+        for (let i=0; i< supabase_arr.length; i++){
+            console.log(`key: ${supabase_arr[i].key}`)
+        }
         
         
         const { error } = await supabase
         .from("scraped_data")
         .upsert(supabase_arr, { onConflict: ['key'] })
         if(error) {
-           console.log(`Error adding scrape data to df: ${error}`) 
+           console.error('Error adding scrape data to df:', error) 
         } else {
             console.log('success in adding scrape data to db')
         }
     }
-    addToDB()
+    setTimeout(() => {
+        addToDB()
+    }, 1000)
 
     },[data])
 
@@ -297,7 +304,7 @@ const Form = () => {
                         </div>
                         <div className='grid md:grid-cols-[repeat(auto-fit,minmax(380px,1fr))] grid-cols-[repeat(auto-fit,minmax(320px,1fr))] md:gap-4 gap-1 w-full place-items-center'>
                             {splitData[page]?.map((item) => (               
-                                <Card supplement_name={item['name']} brand={item['brand']} sizes={item['sizes']} url={item['href']}/>                        
+                                <Card supplement_name={item['trunc_name']} brand={item['brand']} sizes={item['sizes']} url={item['href']}/>                        
                             ))}
                         </div>
                         

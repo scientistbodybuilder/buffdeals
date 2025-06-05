@@ -17,25 +17,25 @@ const Catalog = () => {
     const [loading, setLoading] = useState(false)
     const [page,setPage] = useState(0)
     const [searchKey, setSearchKey] = useState('')
-    const SplitData = (data) => {
-        const pages = Math.ceil(data.length / 12)
+    const SplitData = (db_data) => {
+        const pages = Math.ceil(db_data.length / 12)
         // console.log(`pages: ${pages}`)
         const split = []
         for (let i=0;i<pages;i++){
-            let c = data.slice(i*12,(i+1)*12)
+            let c = db_data.slice(i*12,(i+1)*12)
             split[i] = c
         }
         return split
     }
         
     const [sortSetting,setSortSettingg] = useState(null)
-    const [data, setData] = useState(()=>{
+    const [db_data, setData] = useState(()=>{
         const storedData = localStorage.getItem('DB_DATA')
         return storedData ? JSON.parse(storedData) : []
     })
 
     const [splitData,setSplitData] = useState(() => {
-        return data ? SplitData(data) : []
+        return db_data ? SplitData(db_data) : []
     })
 
 
@@ -77,26 +77,25 @@ const Catalog = () => {
         console.log(`Searching: ${searchKey}`)
         const searchTerms = searchKey.toLowerCase().split(" ")
 
-        const orFilters = searchTerms
-            .map(term => `name.ilike.%${term}%`)
-            .join(',');
+        
+        const { data, error } = await supabase.from("scraped_data")
+        .select("*")
+        .ilike('name', `%${searchKey.toLowerCase().trim()}%`)
 
-        const { result, error } = await supabase.from("scraped_data")
-        .select()
-        .or(orFilters)
+        console.log(`result: ${data}`)
         if (error){
             console.error('Error in searching db', error)
-        } else if (result) {
+        } else if (data) {
             console.log('DB search successful')
-            console.log(`There are ${result.length} results\n`)
-            for (let i=0; i< result.length; i++) {
-                console.log(`name: ${result[i].name}`)
-                console.log(`url: ${result[i].url}`)
-                console.log(`size: ${result[i].size}`)
-                console.log(`price: ${result[i].price}`)
-                console.log(`brand: ${result[i].brand}`)
-                console.log(`multiple_sizes: ${result[i].multiple_sizes}`)
-                console.log(`key6: ${result[i].key}\n`)
+            console.log(`There are ${data.length} results\n`)
+            for (let i=0; i< data.length; i++) {
+                console.log(`name: ${data[i].name}`)
+                console.log(`url: ${data[i].url}`)
+                console.log(`size: ${data[i].size}`)
+                console.log(`price: ${data[i].price}`)
+                console.log(`brand: ${data[i].brand}`)
+                console.log(`multiple_sizes: ${data[i].multiple_sizes}`)
+                console.log(`key6: ${data[i].key}\n`)
             }
         } else {
             console.log('Db query successful, but no data')
@@ -169,7 +168,7 @@ const Catalog = () => {
                         </div>
                         <div className='grid grid-cols-[repeat(auto-fit,minmax(380px,1fr))] gap-4 w-full place-items-center'>
                             {splitData[page]?.map((item) => (               
-                                <Card supplement_name={item['name']} brand={item['brand']} sizes={item['sizes']} url={item['href']}/>                        
+                                <Card supplement_name={item['trunc_name']} brand={item['brand']} sizes={item['sizes']} url={item['href']}/>                        
                             ))}
                         </div>
                         
