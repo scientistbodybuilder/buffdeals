@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import Card from './Card'
 import { Autocomplete, ModalTitle } from '@mantine/core';
 import Header from './Header';
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaFilter } from "react-icons/fa";
 import { UserAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../supabaseClient';
@@ -18,11 +18,11 @@ const Catalog = () => {
     const [page,setPage] = useState(0)
     const [searchKey, setSearchKey] = useState('')
     const SplitData = (db_data) => {
-        const pages = Math.ceil(db_data.length / 12)
+        const pages = Math.ceil(db_data.length / 20)
         // console.log(`pages: ${pages}`)
         const split = []
         for (let i=0;i<pages;i++){
-            let c = db_data.slice(i*12,(i+1)*12)
+            let c = db_data.slice(i*20,(i+1)*20)
             split[i] = c
         }
         return split
@@ -233,9 +233,9 @@ const Catalog = () => {
     
 
     return(
-        <section className='flex flex-col items-center justify-center w-full px-10 mt-24 mb-5'>
-            <div className='mb-15 w-full mt-10 px-5 flex justify-center'>             
-                <div className='flex items-center w-full justify-center'>
+        <section className='flex flex-col items-center justify-start w-full px-10 mt-24 mb-5'>
+            <div className='mb-8 w-full mt-8 px-5 flex justify-center'>             
+                <div className='flex items-center w-full md:w-7/12 justify-center border-gray-300 border-1 rounded-xl'>
                     {/* <div className='max-w-xl border focus:outline-none border-gray-300 bg-gray-100 rounded-xl px-4 py-2 w-full text-black mr-3'>
                         <Autocomplete 
                         placeholder='Search'
@@ -251,14 +251,17 @@ const Catalog = () => {
 
                         ]}/>
                     </div> */}
-                    <input className='max-w-xl border focus:outline-none border-gray-300 bg-gray-100 rounded-xl px-4 py-2 w-full text-black mr-3' type='text' placeholder='Search' onChange={handleSearch}/>
+                    <input className='border-r-1 focus:outline-none border-gray-300 bg-white rounded-tl-xl rounded-bl-xl px-4 py-2 w-full text-black mr-3' type='text' placeholder='Search' onChange={handleSearch}/>
                     <button onClick={() => SearchDB(searchKey)} className='cursor-pointer'>
                         <FaSearch size={20} />
+                    </button>
+                    <button className='cursor-pointer mx-3'>
+                        <FaFilter size={20} color='#40A9EA' />
                     </button>
                 </div>
             </div>
 
-            <div className='flex flex-col mb-5 w-full mt-2 px-5'>
+            {/* <div className='flex flex-col mb-5 w-full mt-2 px-5'>
                 <h2 className='md:text-lg text-sm font-semibold mb-2'>Recent Searches</h2>
                 <ul className='flex gap-2 items-center'>
                     {
@@ -267,15 +270,15 @@ const Catalog = () => {
                         ))
                     }
                 </ul>
-            </div>
+            </div> */}
 
             {
                 (loading && searched) ? (
                     <img src='./spinner-200px-200px.svg' />
                 ) : (
-                    <div className='flex flex-col items-center justify-center mx-auto w-2/3 mt-10'>
+                    <div className='flex flex-col items-center justify-center w-full mt-2'>
                         <h2 className='mb-4 text-sm text-gray-500 font-bold'>Products with '*' have more sizes</h2>
-                        <div className='mb-2 w-full mt-2 px-5'>
+                        <div className='mb-2 w-11/12 mt-2 px-5'>
                             <ul className='flex gap-2 items-center'>
                                 <li className='md:text-lg text-sm font-semibold'>Sort By</li>
                                 <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100 ${sortSetting === 'Size' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Size')}>Size</li>
@@ -283,8 +286,8 @@ const Catalog = () => {
                                 <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100 ${sortSetting === 'Value' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Value')}>Value</li>
                             </ul>
                         </div>
-                        <div className='grid grid-cols-[repeat(auto-fit,minmax(380px,1fr))] gap-4 w-full place-items-center'>
-                            {splitData[page]?.map((item) => (               
+                        <div className='grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] md:grid-cols-[repeat(2,minmax(300px,1fr))] lg:grid-cols-[repeat(3,minmax(300px,1fr))] xl:grid-cols-[repeat(4,minmax(300px,1fr))] gap-3 lg:gap-5 w-full place-items-center'>
+                            {splitData[page]?.map((item) => (
                                 <Card supplement_name={item['trunc_name']} brand={item['brand']} sizes={item['sizes']} url={item['url']}/>                        
                             ))}
                         </div>
