@@ -25,13 +25,22 @@ const Catalog = () => {
     const [searchSettings, setSearchSettings] = useState({'min_price': 0, 'max_price': 1000, 'vegan_only': false})
     const [sortSetting,setSortSetting] = useState(null)
     const [modalOpen, setModalOpen] = useState(false)
+    const [minPrice, setMinPrice] = useState(0);
+    const [maxPrice, setMaxPrice] = useState(null);
+    const [veganOnly, setVeganOnly] = useState(false);
 
     const closeModal = () => {
         setModalOpen(false)
     }
 
     const submitModal = (min_price, max_price, vegan_only) => {
-        setSearchSettings({'min_price': min_price, 'max_price': max_price, 'vegan_only': vegan_only})
+        setVeganOnly(vegan_only)
+        const minPrice = min_price === '' ? 0 : parseFloat(min_price);
+        const maxPrice = max_price === '' ? null : parseFloat(max_price);
+        setMaxPrice(maxPrice)
+        setMinPrice(minPrice)
+        setSearchSettings({'min_price': minPrice, 'max_price': maxPrice, 'vegan_only': vegan_only})
+
         setModalOpen(false)
     }
 
@@ -212,7 +221,7 @@ const Catalog = () => {
                 )
             }
 
-            <SearchSettings open={modalOpen} onClose={closeModal} submit={submitModal} />
+            <SearchSettings open={modalOpen} onClose={closeModal} submit={submitModal} minPrice={minPrice} maxPrice={maxPrice} veganOnly={veganOnly} />
         </section>
     )  
     

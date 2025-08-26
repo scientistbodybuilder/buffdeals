@@ -79,9 +79,11 @@ export const updateSearches = async () => {
                 console.error('Error in searching db', error)
                 return null
             } else if (data) {
+                console.log('Db query successful, data:', data)
                 const filtered_data = data.filter((item) => {
+                    let maxPrice = settings.max_price ? settings.max_price : Infinity;
                     return item.sizes.some((size) => {
-                        const priceInRange = strToNum(size.price) >= settings.min_price && strToNum(size.price) <= settings.max_price;
+                        const priceInRange = strToNum(size.price) >= settings.min_price && strToNum(size.price) <= maxPrice;
                         const veganMatch = !settings.vegan_only || size.vegan === true;
                         
                         return priceInRange && veganMatch;
