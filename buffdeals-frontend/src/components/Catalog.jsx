@@ -9,6 +9,7 @@ import supabase from '../supabaseClient';
 
 import { loadRecent, searchProducts, SearchDB } from '../services/dataUtils';
 import { comparePrice, compareSize, compareValue } from '../services/utils';
+import SearchSettings from './SearchSettings';
 
 
 const Catalog = () => {
@@ -23,7 +24,15 @@ const Catalog = () => {
     const [searchKey, setSearchKey] = useState('')
     const [searchSettings, setSearchSettings] = useState({'min_price': 0, 'max_price': 1000, 'vegan_only': false})
     const [sortSetting,setSortSetting] = useState(null)
+    const [modalOpen, setModalOpen] = useState(false)
 
+    const closeModal = () => {
+        setModalOpen(false)
+    }
+
+    const submitModal = () => {
+        setModalOpen(false)
+    }
 
     const SplitData = (data) => {
         const pages = Math.ceil(data.length / 20)
@@ -147,7 +156,7 @@ const Catalog = () => {
                     <button onClick={() => Search(searchKey, searchSettings)} className='cursor-pointer'>
                         <FaSearch size={20} />
                     </button>
-                    <button className='cursor-pointer mx-3'>
+                    <button className='cursor-pointer mx-3' onClick={() => setModalOpen(true)}>
                         <FaFilter size={20} color='#40A9EA' />
                     </button>
                 </div>
@@ -201,6 +210,8 @@ const Catalog = () => {
                     </div>
                 )
             }
+
+            <SearchSettings open={modalOpen} onClose={closeModal} submit={submitModal} />
         </section>
     )  
     
