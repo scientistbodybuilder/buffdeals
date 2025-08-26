@@ -21,19 +21,19 @@ const Header = () => {
     }
 
     return(
-        <nav className='w-full px-10 mx-auto bg-[#40A9EA] h-17 flex left-0 top-0 right-0 z-100 fixed items-center justify-between border-b-3 border-[#4a90bc]'>
+        <nav className='w-full px-10 mx-auto bg-[#40A9EA] h-16 flex left-0 top-0 right-0 z-100 fixed items-center justify-between border-b-3 border-[#4a90bc]'>
             <h2 className='md:text-2xl text-xl text-white font-sans font-bold'>Buff Deals</h2>
 
             
             <ul className='items-center flex justify-evenly gap-5'>
                 <li className='md:flex hidden'>
                     <a href='https://github.com/scientistbodybuilder?tab=repositories' target='_blank' aria-label='Github'>
-                    <FaGithub size={35} color='white'/>
+                    <FaGithub size={34} color='white'/>
                     </a>
                 </li>
                 <li className='md:flex hidden'>
                     <a href='https://www.linkedin.com/in/ousman-jikineh/' target='_blank' aria-label='Linkedin'>
-                    <FaLinkedin size={35} color='white'/>
+                    <FaLinkedin size={34} color='white'/>
                     </a>
                 </li>
             </ul>

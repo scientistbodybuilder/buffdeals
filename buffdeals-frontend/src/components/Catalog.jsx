@@ -197,15 +197,15 @@ const Catalog = () => {
                         </div>
                         )} 
                         
-                        {page === 0 && splitData.length>1 && (<div className='mt-12 flex items-center justify-center gap-4'>
-                            <button type='button' className=' cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
+                        {page === 0 && splitData.length>1 && (<div className='mt-10 flex items-center justify-center gap-4'>
+                            <button type='button' className=' cursor-pointer rounded-2xl px-7 py-2 font-semibold md:text-xl text-lg text-black text-center' onClick={()=>Next()}>Next</button>
                             </div>)}
-                        {page === (splitData.length-1) && splitData.length>1 && page!=0 && (<div className='mt-12 flex items-center justify-center gap-4'>
-                            <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
+                        {page === (splitData.length-1) && splitData.length>1 && page!=0 && (<div className='mt-10 flex items-center justify-center gap-4'>
+                            <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold md:text-xl text-lg text-black text-center' onClick={()=>Back()}>Back</button>
                             </div>)}
-                        {page < (splitData.length-1) && page > 0 && (<div className='mt-12 flex items-center justify-center gap-4'>
-                            <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
-                            <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
+                        {page < (splitData.length-1) && page > 0 && (<div className='mt-10 flex items-center justify-center gap-4'>
+                            <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold md:text-xl text-lg text-black text-center' onClick={()=>Back()}>Back</button>
+                            <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold md:text-xl text-lg text-black text-center' onClick={()=>Next()}>Next</button>
                             </div>)}
 
                     </div>
