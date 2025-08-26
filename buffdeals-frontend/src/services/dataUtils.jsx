@@ -59,7 +59,7 @@ export const updateSearches = async () => {
     }
 
     const strToNum = (text) => {
-        const num = parseFloat(text.replace(/[^0-9]/g, '').replace(",", "."));
+        const num = parseFloat(text.replace(/[^\d,.]/g, '').replace(',', '.'));
         return isNaN(num) ? 0 : num;
     }
 
@@ -82,7 +82,7 @@ export const updateSearches = async () => {
                 console.log('Db query successful, data:', data)
                 const filtered_data = data.filter((item) => {
                     return item.sizes.some((size) => {
-                        const priceInRange = strToNum(size.price) >= strToNum(settings.min_price) && strToNum(size.price) <= strToNum(settings.max_price);
+                        const priceInRange = strToNum(size.price) >= settings.min_price && strToNum(size.price) <= settings.max_price;
                         const veganMatch = !settings.vegan_only || size.vegan === true;
                         
                         return priceInRange && veganMatch;
