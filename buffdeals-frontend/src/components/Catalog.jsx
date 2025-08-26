@@ -136,7 +136,7 @@ const Catalog = () => {
 
     return(
         <section className='flex flex-col items-center justify-start w-full px-10 mt-24 mb-5'>
-            <div className='mb-8 w-full mt-8 px-5 flex justify-center'>             
+            <div className='mb-8 w-full mt-4 px-5 flex justify-center'>             
                 <div className='flex items-center w-full md:w-7/12 justify-center border-gray-300 border-1 rounded-xl'>
                     {/* <div className='max-w-xl border focus:outline-none border-gray-300 bg-gray-100 rounded-xl px-4 py-2 w-full text-black mr-3'>
                         <Autocomplete 
@@ -179,13 +179,13 @@ const Catalog = () => {
                     <img src='spinner-200px-200px.svg' />
                 ) : (
                     <div className='flex flex-col items-center justify-center w-full mt-2'>
-                        <h2 className='mb-4 text-sm text-gray-500 font-bold'>Products with '*' have more sizes</h2>
+                        <h2 className='mb-3 text-sm text-gray-500 font-bold'>Products with '*' have more sizes</h2>
                         <div className='mb-2 w-11/12 mt-2 px-5'>
                             <ul className='flex gap-2 items-center'>
-                                <li className='md:text-lg text-sm font-semibold'>Sort By</li>
-                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100 ${sortSetting === 'Size' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Size')}>Size</li>
-                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100 ${sortSetting === 'Price' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Price')}>Price</li>
-                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100 ${sortSetting === 'Value' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Value')}>Value</li>
+                                <li className='md:text-base text-sm font-semibold'>Sort By</li>
+                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-base text-sm font-semibold hover:bg-gray-100 ${sortSetting === 'Size' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Size')}>Size</li>
+                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-base text-sm font-semibold hover:bg-gray-100 ${sortSetting === 'Price' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Price')}>Price</li>
+                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-base text-sm font-semibold hover:bg-gray-100 ${sortSetting === 'Value' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Value')}>Value</li>
                             </ul>
                         </div>
                         {splitData.length == 0 ? (<div className='text-xl text-gray-500 font-semibold mt-10'>No products found</div>) :

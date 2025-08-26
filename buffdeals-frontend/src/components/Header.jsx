@@ -21,7 +21,7 @@ const Header = () => {
     }
 
     return(
-        <nav className='w-full px-10 mx-auto bg-[#40A9EA] h-20 flex left-0 top-0 right-0 z-100 fixed items-center justify-between border-b-3 border-[#4a90bc]'>
+        <nav className='w-full px-10 mx-auto bg-[#40A9EA] h-17 flex left-0 top-0 right-0 z-100 fixed items-center justify-between border-b-3 border-[#4a90bc]'>
             <h2 className='md:text-2xl text-xl text-white font-sans font-bold'>Buff Deals</h2>
 
             
