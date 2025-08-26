@@ -26,7 +26,7 @@ const Catalog = () => {
     const [sortSetting,setSortSetting] = useState(null)
     const [modalOpen, setModalOpen] = useState(false)
     const [minPrice, setMinPrice] = useState(0);
-    const [maxPrice, setMaxPrice] = useState(0);
+    const [maxPrice, setMaxPrice] = useState(null);
     const [veganOnly, setVeganOnly] = useState(false);
 
     const closeModal = () => {
@@ -34,11 +34,12 @@ const Catalog = () => {
     }
 
     const submitModal = (min_price, max_price, vegan_only) => {
-        setMinPrice(min_price)
         setVeganOnly(vegan_only)
+        const minPrice = min_price === '' ? 0 : parseFloat(min_price);
         const maxPrice = max_price === '' ? null : parseFloat(max_price);
         setMaxPrice(maxPrice)
-        setSearchSettings({'min_price': parseFloat(min_price), 'max_price': maxPrice, 'vegan_only': vegan_only})
+        setMinPrice(minPrice)
+        setSearchSettings({'min_price': minPrice, 'max_price': maxPrice, 'vegan_only': vegan_only})
 
         setModalOpen(false)
     }

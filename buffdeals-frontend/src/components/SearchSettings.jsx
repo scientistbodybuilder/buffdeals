@@ -15,7 +15,7 @@ const SearchSettings = (props) => {
                         <label className='mb-2'>Min Price</label>
                         <input id='min_price' type='number' step="0.01" min={0} max={1000} defaultValue={props.minPrice} className='border border-gray-300 p-2 rounded-md mb-4 focus:outline-none' />
                         <label className='mb-2'>Max Price</label>
-                        <input id='max_price' type='number' step="0.01" min={0} max={1000} className='border border-gray-300 p-2 rounded-md mb-4 focus:outline-none' />
+                        <input id='max_price' type='number' step="0.01" min={0} max={1000} defaultValue={props.maxPrice || ''} className='border border-gray-300 p-2 rounded-md mb-4 focus:outline-none' />
                         <div className='flex items-center justify-between gap-0.5 mb-6'>
                             <label className=''>Vegan Only</label>
                             <input className='p-15 h-5 w-5' id='vegan_only' type='checkbox' defaultChecked={props.veganOnly} />
