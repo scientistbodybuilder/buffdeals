@@ -59,7 +59,7 @@ export const updateSearches = async () => {
     }
 
     const strToNum = (text) => {
-        const num = parseFloat(text.replace(",", "."));
+        const num = parseFloat(text.replace(/[^0-9]/g, '').replace(",", "."));
         return isNaN(num) ? 0 : num;
     }
 
@@ -71,9 +71,9 @@ export const updateSearches = async () => {
             // const searchTerms = searchKey.toLowerCase().split(" ")
 
             // const { data, error } = await supabase.rpc('filter_by_price_range', { min_price: settings.min_price, max_price: settings.max_price, search_key: search_term.toLowerCase().trim() })
-
+            const searchPattern = `%${search_term.trim().split(" ").join("%")}%`;
             const { data, error } = await supabase.from("scraped_data").select("name,href,brand,trunc_name,sizes")
-            .ilike('name', `%${search_term.toLowerCase().trim()}%`).ilike('brand', `%${search_term.toLowerCase().trim()}%`)
+            .or(`name.ilike.${searchPattern}, brand.ilike.${searchPattern}`)
 
             if (error){
                 console.error('Error in searching db', error)
@@ -82,7 +82,7 @@ export const updateSearches = async () => {
                 console.log('Db query successful, data:', data)
                 const filtered_data = data.filter((item) => {
                     return item.sizes.some((size) => {
-                        const priceInRange = strToNum(size.price) >= settings.min_price && strToNum(size.price) <= settings.max_price;
+                        const priceInRange = strToNum(size.price) >= strToNum(settings.min_price) && strToNum(size.price) <= strToNum(settings.max_price);
                         const veganMatch = !settings.vegan_only || size.vegan === true;
                         
                         return priceInRange && veganMatch;

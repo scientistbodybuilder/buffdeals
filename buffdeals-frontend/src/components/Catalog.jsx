@@ -30,7 +30,8 @@ const Catalog = () => {
         setModalOpen(false)
     }
 
-    const submitModal = () => {
+    const submitModal = (min_price, max_price, vegan_only) => {
+        setSearchSettings({'min_price': min_price, 'max_price': max_price, 'vegan_only': vegan_only})
         setModalOpen(false)
     }
 
