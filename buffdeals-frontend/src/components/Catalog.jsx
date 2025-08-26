@@ -136,7 +136,7 @@ const Catalog = () => {
 
     return(
         <section className='flex flex-col items-center justify-start w-full px-10 mt-24 mb-5'>
-            <div className='mb-8 w-full mt-8 px-5 flex justify-center'>             
+            <div className='mb-8 w-full mt-4 px-5 flex justify-center'>             
                 <div className='flex items-center w-full md:w-7/12 justify-center border-gray-300 border-1 rounded-xl'>
                     {/* <div className='max-w-xl border focus:outline-none border-gray-300 bg-gray-100 rounded-xl px-4 py-2 w-full text-black mr-3'>
                         <Autocomplete 
@@ -179,16 +179,16 @@ const Catalog = () => {
                     <img src='spinner-200px-200px.svg' />
                 ) : (
                     <div className='flex flex-col items-center justify-center w-full mt-2'>
-                        <h2 className='mb-4 text-sm text-gray-500 font-bold'>Products with '*' have more sizes</h2>
+                        <h2 className='mb-3 text-sm text-gray-500 font-bold'>Products with '*' have more sizes</h2>
                         <div className='mb-2 w-11/12 mt-2 px-5'>
                             <ul className='flex gap-2 items-center'>
-                                <li className='md:text-lg text-sm font-semibold'>Sort By</li>
-                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100 ${sortSetting === 'Size' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Size')}>Size</li>
-                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100 ${sortSetting === 'Price' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Price')}>Price</li>
-                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100 ${sortSetting === 'Value' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Value')}>Value</li>
+                                <li className='md:text-base text-sm font-semibold'>Sort By</li>
+                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-base text-sm font-semibold hover:bg-gray-100 ${sortSetting === 'Size' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Size')}>Size</li>
+                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-base text-sm font-semibold hover:bg-gray-100 ${sortSetting === 'Price' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Price')}>Price</li>
+                                <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-base text-sm font-semibold hover:bg-gray-100 ${sortSetting === 'Value' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Value')}>Value</li>
                             </ul>
                         </div>
-                        {splitData.length == 0 ? (<div className='text-xl text-gray-500 font-semibold mt-10'>No products found</div>) :
+                        {splitData.length == 0 ? (<div className='text-xl text-gray-500 font-semibold mt-8'>No products found</div>) :
                         (
                         <div className='grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] md:grid-cols-[repeat(2,minmax(300px,1fr))] lg:grid-cols-[repeat(3,minmax(300px,1fr))] xl:grid-cols-[repeat(4,minmax(300px,1fr))] gap-3 lg:gap-5 w-full place-items-center'>
                             {splitData[page]?.map((item,key) => (
@@ -197,13 +197,13 @@ const Catalog = () => {
                         </div>
                         )} 
                         
-                        {page === 0 && splitData.length>1 && (<div className='mt-16 flex items-center justify-center gap-4'>
+                        {page === 0 && splitData.length>1 && (<div className='mt-12 flex items-center justify-center gap-4'>
                             <button type='button' className=' cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
                             </div>)}
-                        {page === (splitData.length-1) && splitData.length>1 && page!=0 && (<div className='mt-16 flex items-center justify-center gap-4'>
+                        {page === (splitData.length-1) && splitData.length>1 && page!=0 && (<div className='mt-12 flex items-center justify-center gap-4'>
                             <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
                             </div>)}
-                        {page < (splitData.length-1) && page > 0 && (<div className='mt-16 flex items-center justify-center gap-4'>
+                        {page < (splitData.length-1) && page > 0 && (<div className='mt-12 flex items-center justify-center gap-4'>
                             <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Back()}>Back</button>
                             <button type='button' className='cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>
                             </div>)}
