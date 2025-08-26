@@ -17,10 +17,10 @@ export default function App(){
         <Router>
           <div className="flex flex-col items-center justify-center">
             <Routes>
-              <Route path="/login" element={<Login />}></Route>
-              <Route path="/signup" element={<Signup />}></Route>
-              <Route path="/" element={<Form />} />
-              <Route path="/dashboard" element={ <PrivateRoute> <Catalog /> </PrivateRoute>} />
+              {/* <Route path="/login" element={<Login />}></Route> */}
+              {/* <Route path="/signup" element={<Signup />}></Route> */}
+              {/* <Route path="/" element={<Form />} /> */}
+              <Route path="/" element={<Catalog />} />
             </Routes>
           </div>
         </Router>
