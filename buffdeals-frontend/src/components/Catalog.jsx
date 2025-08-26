@@ -153,7 +153,7 @@ const Catalog = () => {
 
                         ]}/>
                     </div> */}
-                    <input className='border-r-1 focus:outline-none border-gray-300 bg-white rounded-tl-xl rounded-bl-xl px-4 py-2 w-full text-black mr-3' type='text' placeholder='Search' onChange={handleSearch}/>
+                    <input onKeyDown={(e) => {if (e.key === 'Enter') {Search(searchKey, searchSettings)}}} className='border-r-1 focus:outline-none border-gray-300 bg-white rounded-tl-xl rounded-bl-xl px-4 py-2 w-full text-black mr-3' type='text' placeholder='Search' onChange={handleSearch}/>
                     <button onClick={() => Search(searchKey, searchSettings)} className='cursor-pointer'>
                         <FaSearch size={20} />
                     </button>
