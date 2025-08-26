@@ -5,7 +5,7 @@ export const loadRecent = async () => {
         const date = new Date().toISOString().split('T')[0]
         const { data } = await supabase.from("scraped_data").select("name,href,brand,trunc_name,sizes").gt('date_scraped', `${date}T00:00:00Z`).limit(50)
         if (data) {
-            console.log('Recent data loaded successfully:', data)
+            // console.log('Recent data loaded successfully:', data)
             return data
         }
 
@@ -67,7 +67,7 @@ export const updateSearches = async () => {
         // setLoading(true)
         // setSearched(true)
         try {
-            console.log(`searching:`, search_term)
+            // console.log(`searching:`, search_term)
             // const searchTerms = searchKey.toLowerCase().split(" ")
 
             // const { data, error } = await supabase.rpc('filter_by_price_range', { min_price: settings.min_price, max_price: settings.max_price, search_key: search_term.toLowerCase().trim() })
@@ -79,7 +79,6 @@ export const updateSearches = async () => {
                 console.error('Error in searching db', error)
                 return null
             } else if (data) {
-                console.log('Db query successful, data:', data)
                 const filtered_data = data.filter((item) => {
                     return item.sizes.some((size) => {
                         const priceInRange = strToNum(size.price) >= settings.min_price && strToNum(size.price) <= settings.max_price;
@@ -92,7 +91,7 @@ export const updateSearches = async () => {
                 
                 
             } else {
-                console.log('Db query successful, but no data')
+                // console.log('Db query successful, but no data')
                 return null
             }
             // setLoading(false)
