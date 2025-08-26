@@ -7,37 +7,64 @@ import { UserAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../supabaseClient';
 
+import { loadRecent, searchProducts, SearchDB } from '../services/dataUtils';
+import { comparePrice, compareSize, compareValue } from '../services/utils';
+
 
 const Catalog = () => {
     const { session } = UserAuth()
     // console.log(session)
     const navigate = useNavigate()
     const [email, setEmail] = useState('')
-
+    const [data, setData] = useState([])
+    const [splitData,setSplitData] = useState([])
     const [loading, setLoading] = useState(false)
     const [page,setPage] = useState(0)
     const [searchKey, setSearchKey] = useState('')
-    const SplitData = (db_data) => {
-        const pages = Math.ceil(db_data.length / 20)
-        // console.log(`pages: ${pages}`)
+    const [searchSettings, setSearchSettings] = useState({'min_price': 0, 'max_price': 1000, 'vegan_only': false})
+    const [sortSetting,setSortSetting] = useState(null)
+
+
+    const SplitData = (data) => {
+        const pages = Math.ceil(data.length / 20)
         const split = []
         for (let i=0;i<pages;i++){
-            let c = db_data.slice(i*20,(i+1)*20)
+            let c = data.slice(i*20,(i+1)*20)
             split[i] = c
         }
         return split
     }
+
+    const Search = async (searchKey, searchSettings) => {
+        setLoading(true)
+        try {
+            console.log('searching for: ', searchKey)
+            console.log('search settings: ', searchSettings)
+            const results = await SearchDB(searchKey, searchSettings)
+            console.log('search results: ', results)
+            if (results) {
+                setData(results)
+                setSplitData(SplitData(results))
+            }
+        } catch (err) {
+            console.error('Error searching products:', err) 
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        const load = async () => {
+            const recent = await loadRecent()
+            console.log('recent: ', recent)
+            if (recent) {
+                setData(recent)
+                setSplitData(SplitData(recent))
+            }
+        }
+        load()   
+    },[])
         
-    const [sortSetting,setSortSettingg] = useState(null)
-    const [db_data, setData] = useState(()=>{
-        const storedData = localStorage.getItem('DB_DATA')
-        return storedData ? JSON.parse(storedData) : []
-    })
-
-    const [splitData,setSplitData] = useState(() => {
-        return db_data ? SplitData(db_data) : []
-    })
-
 
     const [searched, setSearched] = useState(()=>{
         const search = localStorage.getItem('SEARCHED')
@@ -49,19 +76,6 @@ const Catalog = () => {
         return search_history ? JSON.parse(search_history) : []
     })
 
-    useEffect(() => {
-            const db = window.localStorage.getItem('DB_DATA')
-            if (db != null){
-                const parsed = JSON.parse(db)
-                setData(parsed)
-                setSplitData(SplitData(parsed))
-            }
-            
-        },[])
-
-    useEffect(() => {
-        window.localStorage.setItem('DB_DATA',JSON.stringify(db_data))
-    }, [db_data])
 
     useEffect(() => {
             window.localStorage.setItem('SEARCHED', searched)
@@ -76,153 +90,31 @@ const Catalog = () => {
         setEmail(session_email)
     },[])
 
-    
-
-    // const handleToggle = ({ target }) =>
-    //     setState(s => ({ ...s, [target.name]: !s[target.name] }));
-
     const handleSearch = (e) => {
         setSearchKey(e.target.value)
         console.log(searchKey)
     }
 
-    const updateSearches = async () => {
-        const { data, error } = await supabase.from("users")
-        .select("recent_searches")
-        .eq('email', email)
-        if (error) {
-
-        } else {
-            console.log('search history', data[0]['recent_searches'])
-            let new_list
-            if (data[0]['recent_searches'] && data[0]['recent_searches'].length > 2) {
-                console.log('Existing search history of over 2 searches')
-                data[0]['recent_searches'].push(searchKey)
-                new_list = data[0]['recent_searches'].slice(1) 
-            } else if (data[0]['recent_searches']) {
-                console.log('Existing search history of under 3 searches')
-                data[0]['recent_searches'].push(searchKey)
-                new_list = data[0]['recent_searches']
-            } else {
-                console.log('No search history')
-                new_list = [searchKey]
-            }
-
-            console.log(`search list: ${new_list}`)
-            const { error } = await supabase.from("users")
-            .update({recent_searches: new_list})
-            .eq("email", email)
-            if (error) {
-                console.error('Error updating search history', error)
-            } else {
-                console.log('Search history updated')
-                //update it on the ui
-                setSearchHistory(new_list)
-            }
-        }
-    }
-
-    
-    
-    const SearchDB = async (search_term) => {
-        setLoading(true)
-        setSearched(true)
-        try {
-            console.log(`${email} is searching:`, search_term)
-            // const searchTerms = searchKey.toLowerCase().split(" ")
-
-            
-            const { data, error } = await supabase.from("scraped_data")
-            .select("*")
-            .ilike('name', `%${search_term.toLowerCase().trim()}%`)
-
-            if (error){
-                console.error('Error in searching db', error)
-            } else if (data) {
-                console.log('DB search successful')
-                console.log(`There are ${data.length} results\n`)
-                
-                setData(data)
-                setSplitData(SplitData(data))
-
-                //Update the most recent searches
-                await updateSearches()
-                
-            } else {
-                console.log('Db query successful, but no data')
-            }
-            setLoading(false)
-        } catch (e) {
-            console.error('Error', e)
-            setLoading(false)
-        }    
-    }
-
-
-
-    
-
-
-    function comparePrice(a, b) {
-        const pricea = a['sizes'][0]['price']
-        const priceb = b['sizes'][0]['price']
-        if (pricea < priceb) {
-            return -1;
-        } else if (pricea > priceb) {
-            return 1;
-        }
-        // a must be equal to b
-        return 0;
-    }
-    
-    function compareSize(a, b) {
-        const pricea = a['sizes'][0]['size']
-        const priceb = b['sizes'][0]['size']
-        if (pricea < priceb) {
-            return -1;
-        } else if (pricea > priceb) {
-            return 1;
-        }
-        // a must be equal to b
-        return 0;
-    }
-
-    function compareValue(a, b) {
-        const pricea = a['sizes'][0]['value']
-        const priceb = b['sizes'][0]['value']
-        if (pricea < priceb) {
-            return -1;
-        } else if (pricea > priceb) {
-            return 1;
-        }
-        // a must be equal to b
-        return 0;
-    }
-    
-
-
     const Sort = (by) => {
-        if (by=='Price' && db_data.length > 0){
-            setSortSettingg('Price')
-            const sorted = db_data.sort(comparePrice)
+        console.log('sorting')
+        if (by=='Price' && data.length > 0){
+            setSortSetting('Price')
+            const sorted = data.sort(comparePrice)
             setData(sorted)
-            setSplitData(SplitData(db_data))
-        } else if (by=='Size' && db_data.length > 0){
-            setSortSettingg('Size')
-            const sorted = db_data.sort(compareSize)
+            setSplitData(SplitData(data))
+        } else if (by=='Size' && data.length > 0){
+            setSortSetting('Size')
+            const sorted = data.sort(compareSize)
             setData(sorted)
-            setSplitData(SplitData(db_data))
-        } else if (by=='Value' && db_data.length > 0) {
-            setSortSettingg('Value')
-            const sorted = db_data.sort(compareValue)
+            setSplitData(SplitData(data))
+        } else if (by=='Value' && data.length > 0) {
+            setSortSetting('Value')
+            const sorted = data.sort(compareValue)
             setData(sorted)
-            setSplitData(SplitData(db_data))
+            setSplitData(SplitData(data))
         }
     }
     
-    
-    
-
     const Next = () => {
         setPage(c=>c+1)
     }
@@ -252,7 +144,7 @@ const Catalog = () => {
                         ]}/>
                     </div> */}
                     <input className='border-r-1 focus:outline-none border-gray-300 bg-white rounded-tl-xl rounded-bl-xl px-4 py-2 w-full text-black mr-3' type='text' placeholder='Search' onChange={handleSearch}/>
-                    <button onClick={() => SearchDB(searchKey)} className='cursor-pointer'>
+                    <button onClick={() => Search(searchKey, searchSettings)} className='cursor-pointer'>
                         <FaSearch size={20} />
                     </button>
                     <button className='cursor-pointer mx-3'>
@@ -273,8 +165,8 @@ const Catalog = () => {
             </div> */}
 
             {
-                (loading && searched) ? (
-                    <img src='./spinner-200px-200px.svg' />
+                (loading) ? (
+                    <img src='spinner-200px-200px.svg' />
                 ) : (
                     <div className='flex flex-col items-center justify-center w-full mt-2'>
                         <h2 className='mb-4 text-sm text-gray-500 font-bold'>Products with '*' have more sizes</h2>
@@ -286,11 +178,14 @@ const Catalog = () => {
                                 <li className={`border border-gray-300 cursor-pointer rounded-md px-4 py-1 md:text-lg text-base font-semibold hover:bg-gray-100 ${sortSetting === 'Value' ? 'bg-gray-100' : ''}`} onClick={() => Sort('Value')}>Value</li>
                             </ul>
                         </div>
+                        {splitData.length == 0 ? (<div className='text-xl text-gray-500 font-semibold mt-10'>No products found</div>) :
+                        (
                         <div className='grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] md:grid-cols-[repeat(2,minmax(300px,1fr))] lg:grid-cols-[repeat(3,minmax(300px,1fr))] xl:grid-cols-[repeat(4,minmax(300px,1fr))] gap-3 lg:gap-5 w-full place-items-center'>
-                            {splitData[page]?.map((item) => (
-                                <Card supplement_name={item['trunc_name']} brand={item['brand']} sizes={item['sizes']} url={item['url']}/>                        
+                            {splitData[page]?.map((item,key) => (
+                                <Card key={key} supplement_name={item['trunc_name']} brand={item['brand']} sizes={item['sizes']} url={item['href']}/>                        
                             ))}
                         </div>
+                        )} 
                         
                         {page === 0 && splitData.length>1 && (<div className='mt-16 flex items-center justify-center gap-4'>
                             <button type='button' className=' cursor-pointer rounded-2xl px-7 py-2 font-semibold text-2xl text-black text-center' onClick={()=>Next()}>Next</button>

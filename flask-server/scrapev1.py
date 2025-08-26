@@ -1,10 +1,12 @@
+from datetime import datetime, timezone
+from flask import Flask, request, jsonify
 from selenium import webdriver
 import re
-# import undetected_chromedriver as uc
-# from webdriver_manager.firefox import GeckoDriverManager
-# from selenium.webdriver.firefox.service import Service
-# from selenium.webdriver.firefox.options import Options
-
+# db
+# from flask_sqlalchemy import SQLAlchemy
+from supabase import create_client
+# scrap
+from flask_cors import CORS
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -13,13 +15,30 @@ from selenium.webdriver.chrome.options import Options
 import time as tm, os, subprocess
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
-# import tensorflow as tf
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException, NoSuchElementException, ElementNotInteractableException
 
-if __name__ == "__main__":
-    # BEGIN SCRAPPING
-    
-    # tf.lite.interpreter_wrapper.set_use_xnnpack(False)
+# app = Flask(__name__)
+supabase = create_client(os.getenv('SUPABASE_URL'), os.getenv('SUPABASE_KEY'))
+
+# CORS(app, origins=["http://localhost:5173"], resources={r'/get-supplement': {'origins':'*'}})
+
+def num_products(products):
+    count = 0
+    for product in products:
+        count += len(product['sizes'])
+    return count
+
+def extract_num(text):
+    value =  ''.join([x for x in text if (x.isdigit() or x == '.')])
+    if value:
+        return float(value)
+    return 1.0
+
+def scrape(supplement):
+    search_supplement = supplement.strip().split()
+    pattern = r'.*' + r'.*'.join(search_supplement) + r'.*'
+    print(f'search pattern: {pattern}')
+
     service = Service(ChromeDriverManager().install())
     options = Options()
     #options.add_argument(f'--proxy-server=={}')
@@ -36,14 +55,23 @@ if __name__ == "__main__":
     driver.get(urls[1])
     search_bar  = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[id='search-input-desktop']")))
     search_bar.clear()
-    search_bar.send_keys('whey protein')
-    search_btn = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.CSS_SELECTOR, "button[aria-label='search button']"))).click()
+    search_bar.send_keys(supplement)
+    search_btn = WebDriverWait(driver,timeout).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[aria-label='search button']"))).click()
+
 
     print('beginning iteration')
+    tm.sleep(2)
+    try:
+        WebDriverWait(driver,timeout=15).until(EC.element_to_be_clickable((By.XPATH, "//div[@id='overlayContainer']/div/div/button[@id='closeIconContainer']"))).click()
+        print('pop-up closed')
+    except (NoSuchElementException, ElementNotInteractableException,TimeoutException):
+        print('no pop-up detected')
+        pass
 
     container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//ul[@id='product-blocks']/li")))
-    print(f'There are {len(container)} products')
-    for i in range(len(container)):
+    len_container = len(container)
+    print(f'There are {len_container} products')
+    for i in range(len_container):
         container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//ul[@id='product-blocks']/li")))
         # get the product name and url to it's page
         try:
@@ -55,77 +83,88 @@ if __name__ == "__main__":
             product_href = container[i].find_element(By.XPATH, './/a').get_attribute("href")
             product_title = container[i].find_element(By.XPATH, ".//a/div/h2/span").text
 
-        print(f'title: {product_title}')
-
-        if re.search(r'.*whey.*(protein)*.*',product_title.lower()):
+        
+        print('checking if product name matches')
+        if re.search(rf'{pattern}',product_title.lower()):
             driver.get(product_href)
+            print(f'title: {product_title}')
             find = {'name':product_title}
             find['brand'] = 'Revolution Nutrition'
             # get the size and price, for all possible sizes
-            sizes = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='flex items-center variable-items']/li")))
-            print(f'There are {len(sizes)} sizes')
-            # add logic to check whether there is more than one size. If there is more than one flavour, always click chocolate click, so that all sizes are available
-            product_sizes = []
-            
-
-            for i in range(len(sizes)):
-                # click that size
-                try:
-                    size_btn = WebDriverWait(driver,timeout).until(EC.element_to_be_clickable((By.XPATH, f"(//ul[@class='flex items-center variable-items']/li)[{i+1}]")))
-                    driver.execute_script("arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });", size_btn )
-                    size_btn.click()
-                    product_size = size_btn.text
-                except StaleElementReferenceException as e:
-                    print('Stale Element Exception Occured: Retrying')
-                    tm.sleep(2)
-                    size_btn = WebDriverWait(driver,timeout).until(EC.element_to_be_clickable((By.XPATH, f"(//ul[@class='flex items-center variable-items']/li)[{i+1}]")))
-                    driver.execute_script("arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });", size_btn)
-
-                    size_btn.click()
-                    product_size = size_btn.text
-                except Exception as e:
-                    print('Exception Occured')
-                    print(e)
-                    errors+=1
-                    continue
+            try:
+                sizes = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='flex items-center variable-items']/li")))
+            except Exception as e:
+                sizes = None
+            if sizes:
+                len_sizes = len(sizes)
+                print(f'There are {len_sizes} sizes')
+                # add logic to check whether there is more than one size. If there is more than one flavour, always click chocolate click, so that all sizes are available
+                product_sizes = []
                 
-                # there is variation price (regular price), and sometimes variation sale price, which is discounted. check whether discounted price exists, if it does take
-                # that instead
-                try:
-                    price_element = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.XPATH, ".//span[@id='variation-sale-price']")))
-                    product_price = price_element.text
-                except StaleElementReferenceException as e:
-                    print('Stale Element Exception Occured: Retrying')
-                    tm.sleep(2)
-                    price_element = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.XPATH, ".//span[@id='variation-sale-price']")))
-                    product_price = price_element.text
-                except Exception as e:
-                    print('Exception Occured')
-                    print(e)
-                    errors+=1
-                    continue
-                if not product_price:
+
+                for i in range(len_sizes):
+                    # click that size
                     try:
-                        price_element = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.XPATH, ".//span[@id='variation-price']")))
+                        size_btn = WebDriverWait(driver,timeout).until(EC.element_to_be_clickable((By.XPATH, f"(//ul[@class='flex items-center variable-items']/li)[{i+1}]")))
+                        driver.execute_script("arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });", size_btn )
+                        size_btn.click()
+                        product_size = size_btn.text
+                    except StaleElementReferenceException as e:
+                        print('Stale Element Exception Occured: Retrying')
+                        tm.sleep(2)
+                        size_btn = WebDriverWait(driver,timeout).until(EC.element_to_be_clickable((By.XPATH, f"(//ul[@class='flex items-center variable-items']/li)[{i+1}]")))
+                        driver.execute_script("arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });", size_btn)
+
+                        size_btn.click()
+                        product_size = size_btn.text
+                    except Exception as e:
+                        print('Exception Occured')
+                        print(e)
+                        errors+=1
+                        continue
+                    # there is variation price (regular price), and sometimes variation sale price, which is discounted. check whether discounted price exists, if it does take
+                    # that instead
+                    try:
+                        price_element = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.XPATH, ".//span[@id='variation-sale-price']")))
                         product_price = price_element.text
                     except StaleElementReferenceException as e:
                         print('Stale Element Exception Occured: Retrying')
                         tm.sleep(2)
-                        price_element = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.XPATH, ".//span[@id='variation-price']")))
+                        price_element = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.XPATH, ".//span[@id='variation-sale-price']")))
                         product_price = price_element.text
                     except Exception as e:
                         print('Exception Occured')
                         print(e)
                         errors+=1
                         continue
+                    if not product_price:
+                        try:
+                            price_element = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.XPATH, ".//span[@id='variation-price']")))
+                            product_price = price_element.text
+                        except StaleElementReferenceException as e:
+                            print('Stale Element Exception Occured: Retrying')
+                            tm.sleep(2)
+                            price_element = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.XPATH, ".//span[@id='variation-price']")))
+                            product_price = price_element.text
+                        except Exception as e:
+                            print('Exception Occured')
+                            print(e)
+                            errors+=1
+                            continue
+                        
                     
-                
-                print(f'size: {product_size}')
-                print(f'price: {product_price}')
-                product_sizes.append({
-                    'size':product_size,
-                    'price':product_price
-                })
+                    print(f'size: {product_size}')
+                    print(f'price: {product_price}')
+                    product_sizes.append({
+                        'size':product_size,
+                        'price':product_price,
+                        'value': extract_num(product_size) / extract_num(product_price),
+                        'vegan': True if product_title.lower().find('vegan') != -1 else False,
+                    })
+            else:
+                size = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.XPATH, ".//span[@class='capitalize inline']"))).text
+                product_sizes = [{'size': size, 'price': product_price, 'value': ''}]
+
             find['sizes'] = product_sizes
             find['href'] = product_href
             finds.append(find)
@@ -137,20 +176,27 @@ if __name__ == "__main__":
     print('searching')
     search_bar  = WebDriverWait(driver,timeout).until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[placeholder='Search']")))
     search_bar.clear()
-    search_bar.send_keys('whey protein')
+    search_bar.send_keys(supplement)
     search_bar.send_keys(Keys.RETURN)
+
+    #pop up
+    
     #page iteration
     page_num = 1
     while True:
         print(f'page: {page_num}')
         print('beginning iteration')
+        tm.sleep(2)
+        
+
+        
         try:
             container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//div[@class='hdt-shop-content']/hdt-reval-items/hdt-card-product")))
             print(f'There are {len(container)} products')
         except TimeoutException as e:
             print('Page has no products')
             break
-
+        
         for i in range(len(container)):
             container = WebDriverWait(driver,timeout).until(EC.presence_of_all_elements_located((By.XPATH, "//div[@class='hdt-shop-content']/hdt-reval-items/hdt-card-product")))
             
@@ -172,11 +218,12 @@ if __name__ == "__main__":
                 print(e)
                 errors+=1
                 continue
-            print(f'product href: {product_href}')
-            print(f'product title: {product_title}')
-
-            if re.search(r'.*whey.*(protein)*.*',product_title.lower()):
+            
+# and (not vegan or (vegan and product_title.lower().find('vegan') != -1)) and (not isolate or (isolate and product_title.lower().find('isolate') != -1)
+            if re.search(rf'{pattern}',product_title.lower()):
                 driver.get(product_href)
+                print(f'product href: {product_href}')
+                print(f'product title: {product_title}')
                 find = {'name':product_title}
                 find['brand'] = 'Canadian Protein'
                 product_sizes=[]
@@ -221,7 +268,9 @@ if __name__ == "__main__":
                             print(f'price: {product_price}')
                             product_sizes.append({
                                 'size':product_size,
-                                'price':product_price
+                                'price':product_price,
+                                'value': extract_num(product_size) / extract_num(product_price),
+                                'vegan': True if product_title.lower().find('vegan') != -1 else False,
                             })
                         find['sizes'] = product_sizes
                         find['href'] = product_href
@@ -243,7 +292,8 @@ if __name__ == "__main__":
                     print(f'price: {product_price}')
                     product_sizes.append({
                         'size':product_size,
-                        'price':product_price
+                        'price':product_price,
+                        'value': extract_num(product_size) / extract_num(product_price)
                     })
                     find['sizes'] = product_sizes
                     find['href'] = product_href
@@ -257,12 +307,16 @@ if __name__ == "__main__":
         page_list = WebDriverWait(driver,timeout).until(EC.visibility_of_all_elements_located((By.XPATH, "//nav[@class='hdt-pagination']/ul[@role='list']/li")))
         #check whether the last li is a 'Next Page' button
         last_btn = WebDriverWait(driver,timeout).until(EC.element_to_be_clickable((By.XPATH, f"(//nav[@class='hdt-pagination']/ul[@role='list']/li)[{len(page_list)}]")))
-        next = last_btn.find_element(By.XPATH, ".//a")
-        if next.get_attribute('aria-label') == 'Next page':
-            print('\nNext Page\n')
-            page_num+=1
-            driver.get(next.get_attribute('href'))
-        else:
+        try:
+            next = last_btn.find_element(By.XPATH, ".//a")
+            if next.get_attribute('aria-label') == 'Next page':
+                print('\nNext Page\n')
+                page_num+=1
+                driver.get(next.get_attribute('href'))
+            else:
+                print('We have reached the end of the last page')
+                break
+        except NoSuchElementException as e:
             print('We have reached the end of the last page')
             break
 
@@ -275,7 +329,115 @@ if __name__ == "__main__":
     #     file.write()
     #end driver
     print('quit driver')
-    driver.quit()
+    driver.quit()   
     print(f'There were {errors} errors')
-else:
-    print('not on main')
+    return finds
+
+
+def get_supplements(supplement):
+    print('beginning scraping')
+    
+    # data = request.get_json()
+    # print(data)
+    # supplement = data['supplement']
+    # weight = data['weight']
+    # max_price = data['max_price']
+    # min_price = data['min_price']
+    # vegan = data['vegan']  
+    # isolate = data['isolate']
+    
+    # if min_price:
+    #     min_price = float(min_price)
+    # if max_price:
+    #     max_price = float(max_price)
+    # if weight:
+    #     weight = float(weight)
+
+    # print(f'supplement: {supplement}')
+    # print(f'weight: {weight}')
+    # print(f'max price: {max_price}')
+    # print(f'min price: {min_price}')
+    # print(f'vegan: {vegan}')
+    # print(f'isolate: {isolate}')
+
+
+
+    results = scrape(supplement)
+
+    #Post Filtering
+    print(f'We have {num_products(results)} before filtering')
+    #Pre processing
+    # #MAX PRICE
+    # if max_price:
+    #     for i in range(len(results)):
+    #         product = results[i]
+    #         product['sizes'] = [x for x in product['sizes'] if float(''.join([c for c in x['price'] if (c.isdigit() or c=='.')])) <= max_price]
+    #         if product['sizes'] == []:
+    #             product['keep'] = False
+    #         else:
+    #             product['keep'] = True
+    #     results = [x for x in results if x['keep']]
+
+    # #MIN PRICE
+    # if min_price:
+    #     for i in range(len(results)):
+    #         product = results[i]
+    #         product['sizes'] = [x for x in product['sizes'] if float(''.join([c for c in x['price'] if (c.isdigit() or c=='.')])) >= min_price]
+    #         if product['sizes'] == []:
+    #             product['keep'] = False
+    #         else:
+    #             product['keep'] = True
+    #     results = [x for x in results if x['keep']]
+
+    # #WEIGHT
+    # if weight:
+    #     for i in range(len(results)):
+    #         product = results[i]
+    #         product['sizes'] = [x for x in product['sizes'] if abs(float(''.join([c for c in x['size'] if (c.isdigit() or c=='.')])) - float(weight)) <= 1]
+    #         if product['sizes'] == []:
+    #             product['keep'] = False
+    #         else:
+    #             product['keep'] = True
+    #     results = [x for x in results if x['keep']]
+
+    print(f'We have {num_products(results)} after filtering')
+
+    
+    #Truncate names
+    trunc_len = 40
+    print('Truncating')
+    for i in range(len(results)):
+        name = results[i]['name']
+        if len(name) >= trunc_len:
+            trunc = name[:trunc_len]
+            new_name = trunc.strip() + '...'
+            results[i]['trunc_name'] = new_name
+        else:
+            results[i]['trunc_name'] = name
+
+        #add date
+        results[i]['date_scraped'] = datetime.now(timezone.utc).isoformat()
+        results[i]['key'] = f"{results[i]['brand'].lower()}_{results[i]['name'].lower()}"
+
+    print(results)
+
+    #expand results
+
+    # upload to supabase
+    try:
+        response = supabase.table('scraped_data').upsert(results, on_conflict='key').execute()
+    except Exception as e:
+        print(f"Error uploading to Supabase: {e}")
+    # response = jsonify(results)
+    # response.headers.add('Access-Control-Allow-Origin', '*')
+    # return response
+
+# if __name__ == '__main__':
+#     app.run(debug=True)
+#     print('server is running')
+
+sups = ['protein']
+for sup in sups:
+    get_supplements(sup)
+    
+print('success')
