@@ -441,3 +441,5 @@ for sup in sups:
     get_supplements(sup)
     
 print('success')
+with open('log.txt', 'a') as f:
+    f.write(f'Successfully ran at {datetime.now(timezone.utc).isoformat()}\n')
