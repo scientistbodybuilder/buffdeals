@@ -2,8 +2,11 @@ import supabase from '../supabaseClient';
 
 export const loadRecent = async () => {
     try {
-        const date = new Date().toISOString().split('T')[0]
-        const { data } = await supabase.from("scraped_data").select("name,href,brand,trunc_name,sizes").gt('date_scraped', `${date}T00:00:00Z`).limit(50)
+        const today = new Date();
+        const twentyFourHoursBack = new Date(today);
+        twentyFourHoursBack.setHours(today.getHours() - 24);
+        const date = twentyFourHoursBack.toISOString().split('T')[0];
+        const { data } = await supabase.from("scraped_data").select("name,href,brand,trunc_name,sizes").gt('date_scraped', `${date}T00:00:00Z`).limit(50);
         if (data) {
             // console.log('Recent data loaded successfully:', data)
             return data
