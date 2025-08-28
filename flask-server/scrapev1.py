@@ -1,7 +1,10 @@
 from datetime import datetime, timezone
 from flask import Flask, request, jsonify
 from selenium import webdriver
-import re
+import re, io
+from PIL import Image
+import requests
+
 # db
 # from flask_sqlalchemy import SQLAlchemy
 from supabase import create_client
@@ -34,6 +37,35 @@ def extract_num(text):
         return float(value)
     return 1.0
 
+def getImg(url,file_path):
+    try:
+        print(f'getting image from {url}')
+        im = Image.open(requests.get(url, stream=True).raw)
+        im.resize((160,300))
+        buffer = io.BytesIO()
+
+        im.save(buffer, 
+            format='WebP',  # ← This converts it to WebP
+            quality=85,
+            optimize=True)
+        
+        buffer.seek(0)
+        
+        # Upload buffer content directly
+        result = supabase.storage.from_('product-images').upload(
+            path=file_path,
+            file=buffer.getvalue(),  # Get bytes from buffer
+            file_options={
+                'content-type': 'image/webp',
+                'cache-control': '3600',
+                'upsert': 'true'
+            }
+        )
+        print('success', result)
+    except Exception as e:
+        print(f'Exception uploading img to Storage\n Exception: {e}\n Path: {file_path}')
+
+
 def scrape(supplement):
     search_supplement = supplement.strip().split()
     pattern = r'.*' + r'.*'.join(search_supplement) + r'.*'
@@ -46,6 +78,14 @@ def scrape(supplement):
     options.add_argument("--window-size=2560,1600")
     options.add_argument('--log-level=1')
     options.add_argument("--headerless=new")
+    options.add_argument("--disable-background-networking")
+    options.add_argument("--disable-background-timer-throttling")
+    options.add_argument("--disable-backgrounding-occluded-windows")
+    options.add_argument("--disable-sync")
+    options.add_argument("--disable-features=TranslateUI")
+    options.add_argument("--disable-ipc-flooding-protection")
+    options.add_argument("--no-first-run")
+    options.add_argument("--no-service-autorun")
     driver = webdriver.Chrome(service=service, options=options)
     urls = ['https://ca.myprotein.com/','https://revolution-nutrition.com/','https://www.costco.ca/','https://canadianprotein.com/search']
     finds = []
@@ -76,12 +116,33 @@ def scrape(supplement):
         # get the product name and url to it's page
         try:
             product_href = container[i].find_element(By.XPATH, './/a').get_attribute("href")
-            product_title = container[i].find_element(By.XPATH, ".//a/div/h2/span").text
+            # product_title = container[i].find_element(By.XPATH, ".//a/div/h2/span").text
+            product_h2 = container[i].find_element(By.XPATH, ".//a/div/h2")
+            inner_spans = product_h2.find_elements(By.XPATH, './span')
+            product_title = ''
+            for span in inner_spans:
+                product_title += span.text + ' '
+            product_title = product_title.strip()
+
+            # get img
+            img_url = container[i].find_element(By.XPATH, './/a/img').get_attribute("src")
+            getImg(img_url, f'revolution_nutrition/{product_title[:30].strip().replace(" ","_")}.webp')
+
         except StaleElementReferenceException as e:
             print('Stale Element Exception Occured: Retrying')
             tm.sleep(2)
             product_href = container[i].find_element(By.XPATH, './/a').get_attribute("href")
-            product_title = container[i].find_element(By.XPATH, ".//a/div/h2/span").text
+            # product_title = container[i].find_element(By.XPATH, ".//a/div/h2/span").text
+            product_h2 = container[i].find_element(By.XPATH, ".//a/div/h2")
+            inner_spans = product_h2.find_elements(By.XPATH, './span')
+            product_title = ''
+            for span in inner_spans:
+                product_title += span.text + ' '
+            product_title = product_title.strip()
+
+            img_url = container[i].find_element(By.XPATH, './/a/img').get_attribute("src")
+            getImg(img_url, f'revolution_nutrition/{product_title[:30].strip().replace(" ","_")}.webp')
+
 
         
         print('checking if product name matches')
@@ -203,16 +264,22 @@ def scrape(supplement):
             # get the product name and url to it's page
             try:
                 product = container[i].find_element(By.XPATH, ".//div[@class='hdt-card-product__wrapper']/div[contains(concat(' ', @class, ' '), ' hdt-card-product__info ')]")
+                media = container[i].find_element(By.XPATH, ".//div[@class='hdt-card-product__wrapper']/div[contains(concat(' ', @class, ' '), ' hdt-card-product__media ')]")
                 product_href = product.find_element(By.XPATH, ".//a").get_attribute("href")
                 html = product.find_element(By.XPATH, ".//a").get_attribute("outerHTML")
                 product_title = html.split('>')[1][:-3]
+                img_ref = media.find_element(By.XPATH, ".//a/img").get_attribute("src")
+                getImg(img_ref, f'canadian_protein/{product_title[:30].strip().replace(" ","_")}.webp')
             except StaleElementReferenceException as e:
                 print(f'Stale Element Exception Occured: Retrying')
                 tm.sleep(2)
                 product = container[i].find_element(By.XPATH, ".//div[@class='hdt-card-product__wrapper']/div[contains(concat(' ', @class, ' '), ' hdt-card-product__info ')]")
+                media = container[i].find_element(By.XPATH, ".//div[@class='hdt-card-product__wrapper']/div[contains(concat(' ', @class, ' '), ' hdt-card-product__media ')]")
                 product_href = product.find_element(By.XPATH, ".//a").get_attribute("href")
                 html = product.find_element(By.XPATH, ".//a").get_attribute("outerHTML")
                 product_title = html.split('>')[1][:-3]
+                img_ref = media.find_element(By.XPATH, ".//a/img").get_attribute("src")
+                getImg(img_ref, f'canadian_protein/{product_title[:30].strip().replace(" ","_")}.webp')
             except Exception as e:
                 print('Exception Occured')
                 print(e)
@@ -436,7 +503,7 @@ def get_supplements(supplement):
 #     app.run(debug=True)
 #     print('server is running')
 
-sups = ['protein']
+sups = ['protein','creatine']
 for sup in sups:
     get_supplements(sup)
     

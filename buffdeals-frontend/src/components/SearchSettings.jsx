@@ -1,6 +1,5 @@
 import React from 'react'
 
-
 const SearchSettings = (props) => {
     if (!props.open) {
         return null
