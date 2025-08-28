@@ -10,15 +10,15 @@ const Header = () => {
     const navigate = useNavigate()
     const { session, signOut } = UserAuth()
 
-    const handleSignOut = async (e) => {
-        e.preventDefault()
-        try {
-            await signOut()
-            navigate('/')
-        } catch(e) {
-            console.log(`Error on signout: ${e}`)
-        }
-    }
+    // const handleSignOut = async (e) => {
+    //     e.preventDefault()
+    //     try {
+    //         await signOut()
+    //         navigate('/')
+    //     } catch(e) {
+    //         console.error(`Error on signout: ${e}`)
+    //     }
+    // }
 
     return(
         <nav className='w-full px-10 mx-auto bg-[#40A9EA] h-16 flex left-0 top-0 right-0 z-100 fixed items-center justify-between border-b-3 border-[#4a90bc]'>

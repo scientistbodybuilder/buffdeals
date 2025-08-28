@@ -1,13 +1,12 @@
 import React, {useState, useEffect} from 'react'
 import Card from './Card'
-import { Autocomplete, ModalTitle } from '@mantine/core';
+// import { Autocomplete, ModalTitle } from '@mantine/core';
 import Header from './Header';
 import { FaSearch, FaFilter } from "react-icons/fa";
 import { UserAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import supabase from '../supabaseClient';
 
-import { loadRecent, searchProducts, SearchDB } from '../services/dataUtils';
+import { loadRecent, SearchDB } from '../services/dataUtils';
 import { comparePrice, compareSize, compareValue } from '../services/utils';
 import SearchSettings from './SearchSettings';
 
@@ -57,8 +56,8 @@ const Catalog = () => {
     const Search = async (searchKey, searchSettings) => {
         setLoading(true)
         try {
-            console.log('searching for: ', searchKey)
-            console.log('search settings: ', searchSettings)
+            // console.log('searching for: ', searchKey)
+            // console.log('search settings: ', searchSettings)
             const results = await SearchDB(searchKey, searchSettings)
             console.log('search results: ', results)
             if (results) {
@@ -200,9 +199,12 @@ const Catalog = () => {
                         {splitData.length == 0 ? (<div className='text-xl text-gray-500 font-semibold mt-8'>No products found</div>) :
                         (
                         <div className='grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] md:grid-cols-[repeat(2,minmax(300px,1fr))] lg:grid-cols-[repeat(3,minmax(300px,1fr))] xl:grid-cols-[repeat(4,minmax(300px,1fr))] gap-3 lg:gap-5 w-full place-items-center'>
-                            {splitData[page]?.map((item,key) => (
-                                <Card key={key} supplement_name={item['trunc_name']} brand={item['brand']} sizes={item['sizes']} url={item['href']}/>                        
-                            ))}
+                            {splitData[page]?.map((item,key) => {
+                                const path = `${item['brand'].toLowerCase().split(' ').join('_')}/${item['name'].slice(0,30).split(' ').join('_')}.webp`;
+                                return (
+                                    <Card key={key} supplement_name={item['trunc_name']} brand={item['brand']} sizes={item['sizes']} url={item['href']} image_path={path ? path : null}/>                        
+                                )
+                            })}
                         </div>
                         )} 
                         

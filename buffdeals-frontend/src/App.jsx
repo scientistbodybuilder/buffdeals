@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import React from 'react'
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import supabase from "./supabaseClient";
 import { MantineProvider } from '@mantine/core';
-import Form from './components/Form'
+// import Form from './components/Form'
 import Catalog from './components/Catalog'
-import Login from './components/Login'
-import Signup from './components/Signup'
-import PrivateRoute from "./components/PrivateRoute";
+// import Login from './components/Login'
+// import Signup from './components/Signup'
+// import PrivateRoute from "./components/PrivateRoute";
 import { AuthContextProvider } from "./context/AuthContext";
 
 

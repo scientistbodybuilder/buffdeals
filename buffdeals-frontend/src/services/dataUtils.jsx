@@ -13,7 +13,7 @@ export const loadRecent = async () => {
         }
 
     } catch (err) {
-        console.log('Error loading recent data:', err)
+        console.error('Error loading recent data:', err)
     }
 }
 
@@ -21,7 +21,21 @@ export const searchProducts = async () => {
     try {
 
     } catch (err) {
-        console.log('Error searching products:', err)
+        console.error('Error searching products:', err)
+    }
+}
+
+export const fetchImg = async (path) => {
+    try {
+        const { data, error } = await supabase.storage.from('product-images').download(path);
+        if (error) {
+            console.error('Error fetching image: ', error)
+            return null
+        }
+        return data
+    } catch (e) {
+        console.error('Image fetch error: ', e)
+        return null
     }
 }
 
