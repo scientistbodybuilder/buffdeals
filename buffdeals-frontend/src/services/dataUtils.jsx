@@ -6,7 +6,7 @@ export const loadRecent = async () => {
         const twentyFourHoursBack = new Date(today);
         twentyFourHoursBack.setHours(today.getHours() - 24);
         const date = twentyFourHoursBack.toISOString().split('T')[0];
-        const { data } = await supabase.from("scraped_data").select("name,href,brand,trunc_name,sizes").gt('date_scraped', `${date}T00:00:00Z`).limit(50);
+        const { data } = await supabase.from("scraped_data").select("name,href,brand,trunc_name,sizes").order('date_scraped', { ascending: false }).limit(100);
         if (data) {
             // console.log('Recent data loaded successfully:', data)
             return data
