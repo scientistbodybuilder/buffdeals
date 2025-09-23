@@ -503,7 +503,7 @@ def get_supplements(supplement):
 #     app.run(debug=True)
 #     print('server is running')
 
-sups = ['protein','creatine']
+sups = ['protein','creatine','whey']
 for sup in sups:
     get_supplements(sup)
     
