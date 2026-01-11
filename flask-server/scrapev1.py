@@ -486,13 +486,23 @@ def get_supplements(supplement):
         results[i]['date_scraped'] = datetime.now(timezone.utc).isoformat()
         results[i]['key'] = f"{results[i]['brand'].lower()}_{results[i]['name'].lower()}"
 
-    print(results)
+    unique_products = {}
+    for product in results:
+        key = product['key']
+        if key not in unique_products:
+            unique_products[key] = product
+
+    # Convert back to list
+    deduplicated_list = list(unique_products.values())
+
+
+    print(deduplicated_list)
 
     #expand results
 
     # upload to supabase
     try:
-        response = supabase.table('scraped_data').upsert(results, on_conflict='key').execute()
+        response = supabase.table('scraped_data').upsert(deduplicated_list, on_conflict='key').execute()
     except Exception as e:
         print(f"Error uploading to Supabase: {e}")
     # response = jsonify(results)
